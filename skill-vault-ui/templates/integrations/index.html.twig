@@ -1,0 +1,473 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_brand_icons.html.twig' as brand %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}Integrations & Exposure · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .section-heading {
+        margin: 0 0 4px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    .section-subtext {
+        margin: 0 0 18px;
+        font-size: 0.88rem;
+        color: var(--text-muted);
+    }
+
+    .integration-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 380px));
+        gap: 20px;
+    }
+
+    .integration-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .integration-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .integration-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .integration-logo svg {
+        width: 37px;
+        height: 37px;
+    }
+
+    .integration-heading {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .integration-name-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .integration-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .status-pill .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+    }
+
+    .status-pill.connected { color: #15803d; }
+    .status-pill.connected .dot { background: #16a34a; }
+
+    .status-pill.disconnected { color: var(--text-faint); }
+    .status-pill.disconnected .dot { background: var(--text-faint); }
+
+    .integration-account {
+        margin-top: 2px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .credential-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .credential-note svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    .integration-desc {
+        margin: 0;
+        font-size: 0.88rem;
+        color: var(--text-soft);
+        line-height: 1.5;
+    }
+
+    .integration-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .integration-actions .btn {
+        width: auto;
+        flex: 1;
+        padding: 9px 14px;
+        font-size: 0.86rem;
+    }
+
+    .btn-manage {
+        background: var(--surface-raised);
+        color: var(--text);
+        border: 1px solid var(--border);
+        font-weight: 700;
+    }
+
+    .btn-manage:hover {
+        background: var(--border);
+    }
+
+    .btn-disconnect {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid transparent;
+        font-weight: 700;
+    }
+
+    .btn-disconnect:hover {
+        background: #fbdadf;
+    }
+
+    .integration-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        background: #eef2ff;
+        color: var(--text-soft);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .integration-note svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        color: var(--accent);
+    }
+
+    .exposure-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    .exposure-option {
+        position: relative;
+        text-align: left;
+        cursor: pointer;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        font: inherit;
+        color: inherit;
+    }
+
+    .exposure-option:hover {
+        border-color: var(--border-strong);
+    }
+
+    .exposure-option.selected {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(43, 82, 224, 0.12);
+    }
+
+    .exposure-option-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .exposure-radio {
+        margin-top: 2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--border-strong);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .exposure-option.selected .exposure-radio {
+        border-color: var(--accent);
+    }
+
+    .exposure-radio::after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        transform: scale(0);
+        transition: transform 0.1s ease;
+    }
+
+    .exposure-option.selected .exposure-radio::after {
+        transform: scale(1);
+    }
+
+    .exposure-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .exposure-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .recommended-badge {
+        background: #e7ecfe;
+        color: var(--accent-deep);
+        font-size: 0.72rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 2px 9px;
+    }
+
+    .exposure-desc {
+        margin: 2px 0 0;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .exposure-checklist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .exposure-checklist li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--text-soft);
+    }
+
+    .exposure-checklist svg {
+        width: 15px;
+        height: 15px;
+        color: #16a34a;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('integrations') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Integrations</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>Integrations & Exposure</h1>
+                        <p>Connect your tools and control how your skills are exposed to Claude. Use your own accounts for personal tools, or route through gc-vault for secure, organization-wide access.</p>
+                    </div>
+                </div>
+            </div>
+
+            <section>
+                <h2 class="section-heading">Your Integrations</h2>
+
+                <div class="integration-grid">
+                    {% for integration in integrations %}
+                        <div class="integration-card" data-integration="{{ integration.key }}">
+                            <div class="integration-top">
+                                <span class="integration-logo">{{ brand.logo(integration.key) }}</span>
+
+                                <div class="integration-heading">
+                                    <div class="integration-name-row">
+                                        <span class="integration-name">{{ integration.name }}</span>
+                                        <span class="status-pill {{ integration.connected ? 'connected' : 'disconnected' }}">
+                                            <span class="dot"></span>
+                                            {{ integration.connected ? 'Connected' : 'Not connected' }}
+                                        </span>
+                                    </div>
+                                    <div class="integration-account">{{ integration.account }}</div>
+                                    <span class="credential-note">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        Uses your own credentials
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p class="integration-desc">{{ integration.description }}</p>
+
+                            <div class="integration-actions">
+                                <button type="button" class="btn btn-manage">Manage</button>
+                                <button type="button" class="btn btn-disconnect">Disconnect</button>
+                            </div>
+
+                            <div class="integration-note">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <span>This integration uses your personal {{ integration.name }} account. Only you can access this data.</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-heading">Claude Exposure Settings</h2>
+                <p class="section-subtext">Choose how your skills and integrations are exposed to Claude.</p>
+
+                <div class="exposure-grid" id="exposureGrid">
+                    <button type="button" class="exposure-option {{ exposureMode == 'direct' ? 'selected' : '' }}" data-mode="direct">
+                        <div class="exposure-option-head">
+                            <span class="exposure-radio"></span>
+                            <div>
+                                <div class="exposure-title-row">
+                                    <span class="exposure-title">Direct Exposure</span>
+                                    <span class="recommended-badge">Recommended</span>
+                                </div>
+                                <p class="exposure-desc">Claude can directly use your connected tools (e.g., Trello, Drive) with your credentials.</p>
+                            </div>
+                        </div>
+                        <ul class="exposure-checklist">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Uses your own integration credentials
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Best for personal productivity
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Full access to your connected tools
+                            </li>
+                        </ul>
+                    </button>
+
+                    <button type="button" class="exposure-option {{ exposureMode == 'routed' ? 'selected' : '' }}" data-mode="routed">
+                        <div class="exposure-option-head">
+                            <span class="exposure-radio"></span>
+                            <div>
+                                <div class="exposure-title-row">
+                                    <span class="exposure-title">Routed Exposure</span>
+                                </div>
+                                <p class="exposure-desc">Requests go through gc-vault, which provides a lightweight index and routes to the right skills.</p>
+                            </div>
+                        </div>
+                        <ul class="exposure-checklist">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Tools and data routed through gc-vault
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Lightweight indexing for better context
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                More control and auditability
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Ideal for team and organization use
+                            </li>
+                        </ul>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var grid = document.getElementById('exposureGrid');
+
+    grid.addEventListener('click', function (event) {
+        var option = event.target.closest('.exposure-option');
+        if (!option) {
+            return;
+        }
+        grid.querySelectorAll('.exposure-option').forEach(function (el) {
+            el.classList.toggle('selected', el === option);
+        });
+    });
+
+    document.querySelectorAll('.btn-disconnect').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var card = btn.closest('.integration-card');
+            var pill = card.querySelector('.status-pill');
+            var connected = pill.classList.contains('connected');
+
+            pill.classList.toggle('connected', !connected);
+            pill.classList.toggle('disconnected', connected);
+            pill.lastChild.textContent = connected ? 'Not connected' : 'Connected';
+            btn.textContent = connected ? 'Reconnect' : 'Disconnect';
+        });
+    });
+})();
+</script>
+{% endblock %}
