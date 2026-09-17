@@ -33,19 +33,18 @@ final class SkillGroupController extends AbstractController
 
         $groups = array_map(
             static function (SkillGroup $group) use ($skills): array {
-                $skillCount = 0;
-                foreach ($skills as $skill) {
-                    if ($skill['group'] === $group->getName()) {
-                        ++$skillCount;
-                    }
-                }
+                $groupSkills = array_values(array_filter(
+                    $skills,
+                    static fn (array $skill): bool => $skill['group'] === $group->getName(),
+                ));
 
                 return [
                     'name' => $group->getName(),
                     'description' => $group->getDescription(),
                     'icon' => $group->getIcon(),
                     'color' => $group->getColor(),
-                    'skillCount' => $skillCount,
+                    'skillCount' => \count($groupSkills),
+                    'skills' => $groupSkills,
                     // Access control and per-group enablement aren't implemented yet — every
                     // group is displayed as public/editable/enabled for now.
                     'access' => ['type' => 'public', 'label' => 'Public', 'scope' => 'All users (Writable)'],
