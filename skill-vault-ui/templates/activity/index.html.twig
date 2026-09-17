@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}Activity · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .coming-soon {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 64px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 14px;
+    }
+
+    .coming-soon .icon-badge {
+        width: 52px;
+        height: 52px;
+        border-radius: 15px;
+        background: linear-gradient(140deg, var(--accent) 0%, var(--accent-deep) 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(43, 82, 224, 0.22);
+    }
+
+    .coming-soon .icon-badge svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .coming-soon h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .coming-soon p {
+        margin: 0;
+        max-width: 420px;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('activity') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Activity</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>Activity</h1>
+                        <p>A detailed log of who changed what, and when.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="coming-soon">
+                <span class="icon-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                </span>
+                <h2>Coming soon</h2>
+                <p>The activity log is under construction. Soon you'll be able to see a detailed history of changes made across skills and skill groups.</p>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
