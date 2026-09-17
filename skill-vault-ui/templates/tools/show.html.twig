@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_avatar.html.twig' as avatar %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}{{ tool.name }} · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 60px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .page-hero {
+        gap: 12px;
+    }
+
+    .tool-page {
+        width: 100%;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: var(--text);
+    }
+
+    .back-link svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .tool-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .tool-header h1 {
+        margin: 0 0 4px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        text-align: left;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .tool-header p {
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.5;
+        max-width: 520px;
+    }
+
+    .content-box {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 22px;
+    }
+
+    .content-box pre {
+        margin: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: var(--text);
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('tools') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <a href="{{ path('app_tools') }}">Tools</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>{{ tool.name }}</span>
+                </div>
+
+                <div class="page-toolbar">
+                    <a href="{{ path('app_tools') }}" class="back-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="tool-page">
+                <div class="tool-header">
+                    {{ avatar.render('bolt', 'blue', 'lg') }}
+                    <div>
+                        <h1>{{ tool.name }}</h1>
+                        <p>{{ tool.description }}</p>
+                    </div>
+                </div>
+
+                <div class="content-box">
+                    <pre>{{ tool.yaml }}</pre>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

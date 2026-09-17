@@ -1,0 +1,176 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_avatar.html.twig' as avatar %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}Tools · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead th {
+        text-align: left;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-faint);
+        font-weight: 700;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-raised);
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+    }
+
+    tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    tbody tr:hover {
+        background: var(--surface-raised);
+    }
+
+    tbody td {
+        padding: 13px 20px;
+        vertical-align: middle;
+        font-size: 0.92rem;
+        color: var(--text-soft);
+    }
+
+    .tool-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .col-description {
+        max-width: 480px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        padding: 30px 10px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('tools') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Tools</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>Tools</h1>
+                        <p>Pre-curated MCP tools that skills can orchestrate. Tools are added and maintained by developers.</p>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <label class="search-input">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="toolSearch" placeholder="Search tools...">
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="toolTableBody">
+                        {% for tool in tools %}
+                            <tr data-name="{{ tool.name|lower }}" onclick="window.location='{{ path('app_tool', {slug: tool.slug}) }}'">
+                                <td>
+                                    <span class="tool-name-cell">
+                                        {{ avatar.render('bolt', 'blue', 'sm') }}
+                                        {{ tool.name }}
+                                    </span>
+                                </td>
+                                <td class="col-description">{{ tool.description }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="empty-state" id="toolEmptyState" style="display:none;">No tools match your search.</div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var tableBody = document.getElementById('toolTableBody');
+    var searchInput = document.getElementById('toolSearch');
+    var emptyState = document.getElementById('toolEmptyState');
+
+    function applyFilters() {
+        var query = searchInput.value.trim().toLowerCase();
+        var visibleCount = 0;
+
+        Array.prototype.forEach.call(tableBody.children, function (row) {
+            var visible = !query || row.dataset.name.indexOf(query) !== -1;
+            row.style.display = visible ? '' : 'none';
+            if (visible) {
+                visibleCount++;
+            }
+        });
+
+        emptyState.style.display = visibleCount === 0 ? '' : 'none';
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+})();
+</script>
+{% endblock %}
