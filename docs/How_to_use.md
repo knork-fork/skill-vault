@@ -37,6 +37,7 @@ Claude Code can talk to the Skill Vault MCP server directly from the CLI.
 To remove the server later, run `claude mcp remove skill-vault`.
 
 ## Adding a connector in Claude.ai (web)
+(**WIP, not yet released**)
 
 Claude.ai lets you add the same MCP server as a custom connector so it's available in your web conversations.
 
