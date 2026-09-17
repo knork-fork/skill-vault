@@ -11,3 +11,16 @@ docker-compose up -d --build
 
 `scripts/setup.sh` generates the shared secret that `skill-vault-ui` and `skill-vault-mcp-server` use to validate
 each other's OAuth tokens (see `docs/How_to_use.md`). It's safe to re-run.
+
+## Invite-only signup
+
+By default, `/signup` on `skill-vault-ui` is open to anyone. To restrict it:
+
+```
+./scripts/enable_invite_only.sh
+```
+
+This writes a secret to `skill-vault-ui/.env.local` and prints an invite link (`/signup?invite=<secret>`).
+Signup requires that link; re-running the script rotates the secret and invalidates the old one.
+
+To disable signup entirely, set `INVITE_SECRET=disabled` in `.env.local`.
