@@ -2,7 +2,7 @@
     Shared app shell sidebar. Usage:
         {% import 'components/_shell.html.twig' as shell %}
         {{ shell.sidebar('skills') }}
-    `active` is one of: home, skills, skill_groups, integrations, activity, settings.
+    `active` is one of: home, skills, skill_groups, tools, integrations, activity, settings.
     Include components/_shell_styles.html.twig once in the page's stylesheets block.
 #}
 {% macro sidebar(active) %}
@@ -30,6 +30,10 @@
             <a href="{{ path('app_skill_groups') }}" class="nav-item {{ active == 'skill_groups' ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Skill Groups
+            </a>
+            <a href="#" class="nav-item {{ active == 'tools' ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2 19l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2-2z"/></svg>
+                Tools
             </a>
             <a href="#" class="nav-item {{ active == 'integrations' ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v5"/><path d="M15 2v5"/><path d="M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/></svg>
