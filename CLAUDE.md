@@ -2,11 +2,23 @@ This project is a Skill Vault for creating, organizing, versioning and managing 
 
 ## Repository structure
 
-- resources/ - contains gitignored files for storing user data, skills, tools and other resources. This is where the Skill Vault stores its data.
-- skill-vault-mcp-server/ - serves and handles MCP requests, lists tools and skills, manages user auth, executes skills and tools
-- skill-vault-ui/ - web UI for managing skills, skill groups, and user access
+This repo holds two **separate, independently deployed services** — not a frontend/backend split of one
+app. Each is its own full-stack PHP/Symfony application (its own `src/`, `public/`, config, tests, containers)
+with its own persistence concerns. They only share the same Postgres database (see `resources/`) and
+`schema.sql`; they do not share code.
 
-Critical: never explore unrelated directories when prompted to specifically work with a target directory.
+- `resources/` - gitignored files for storing user data, skills, tools and other resources. This is where the
+  Skill Vault stores its data.
+- `skill-vault-mcp-server/` - the MCP server: serves and handles MCP requests, lists tools and skills, manages
+  user auth, executes skills and tools. Has no UI of its own.
+- `skill-vault-ui/` - the web UI application (Symfony, server-rendered Twig templates, no separate JS
+  frontend) for managing skills, skill groups, and user access. See `skill-vault-ui/CLAUDE.md` for details on
+  this service specifically.
+
+Critical: never explore unrelated directories/services when prompted to specifically work with a target
+directory. In particular, do not assume `skill-vault-ui` is "the frontend" and `skill-vault-mcp-server` is
+"the backend" for it — treat them as two separate targets and ask if it's unclear which one (or both) a task
+concerns.
 
 ## Definition of done
 
