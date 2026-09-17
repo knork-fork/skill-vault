@@ -138,6 +138,10 @@
                                 </td>
                                 <td class="col-description">{{ tool.description }}</td>
                             </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="empty-state">No tools available, please add new ones.</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>

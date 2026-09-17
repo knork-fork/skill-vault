@@ -214,6 +214,15 @@
         border-color: var(--border-strong);
     }
 
+    .action-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+
+    .action-card.disabled:hover {
+        border-color: var(--border);
+    }
+
     .action-card.primary {
         background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
         border-color: var(--accent-deep);
@@ -432,6 +441,24 @@
         color: var(--text);
     }
 
+    .panel-empty {
+        padding: 32px 12px 24px;
+        text-align: center;
+    }
+
+    .panel-empty-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+    }
+
+    .panel-empty-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
     /* shared chrome for the three dashboard lists */
     .panel-list {
         padding: 18px 20px 20px;
@@ -611,8 +638,8 @@
                     </span>
                     <div class="stat-body">
                         <span class="stat-title">Enabled Skills</span>
-                        <span class="stat-value">24</span>
-                        <span class="stat-sub">out of 28 total</span>
+                        <span class="stat-value">{{ totalSkills }}</span>
+                        <span class="stat-sub">out of {{ totalSkills }} total</span>
                     </div>
                 </div>
 
@@ -622,7 +649,7 @@
                     </span>
                     <div class="stat-body">
                         <span class="stat-title">Skill Groups</span>
-                        <span class="stat-value">4</span>
+                        <span class="stat-value">{{ totalGroups }}</span>
                         <span class="stat-sub">Keep organizing</span>
                     </div>
                 </div>
@@ -633,8 +660,8 @@
                     </span>
                     <div class="stat-body">
                         <span class="stat-title">Pending Approvals</span>
-                        <span class="stat-value">3</span>
-                        <span class="stat-sub">Requires your review</span>
+                        <span class="stat-value">0</span>
+                        <span class="stat-sub">No approval workflow yet</span>
                     </div>
                 </div>
 
@@ -662,7 +689,7 @@
                     <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
 
-                <a href="#" class="action-card">
+                <a href="{{ path('app_integrations') }}" class="action-card">
                     <span class="action-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v5"/><path d="M15 2v5"/><path d="M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/></svg>
                     </span>
@@ -684,7 +711,7 @@
                     <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
 
-                <a href="#" class="action-card">
+                <span class="action-card disabled" aria-disabled="true">
                     <span class="action-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
                     </span>
@@ -693,7 +720,7 @@
                         <span class="subtitle">Explore templates</span>
                     </span>
                     <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
+                </span>
             </section>
 
             <section class="panel-grid">
@@ -705,49 +732,22 @@
                         </a>
                     </div>
 
-                    <div class="list-item">
-                        {{ avatar.render('trello', 'blue', 'md') }}
-                        <div class="list-body">
-                            <div class="list-title">Trello Workflows</div>
-                            <div class="list-subtitle">5 skills · Project management</div>
+                    {% for group in topGroups %}
+                        <div class="list-item">
+                            {{ avatar.render(group.icon, group.color, 'md') }}
+                            <div class="list-body">
+                                <div class="list-title">{{ group.name }}</div>
+                                <div class="list-subtitle">{{ group.skillCount }} skill{{ group.skillCount == 1 ? '' : 's' }}</div>
+                            </div>
+                            <span class="list-more">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            </span>
                         </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
-
-                    <div class="list-item">
-                        {{ avatar.render('terminal', 'green', 'md') }}
-                        <div class="list-body">
-                            <div class="list-title">Backend</div>
-                            <div class="list-subtitle">8 skills · Engineering</div>
+                    {% else %}
+                        <div class="panel-empty">
+                            <p class="panel-empty-text">No skill groups available, please add new ones.</p>
                         </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
-
-                    <div class="list-item">
-                        {{ avatar.render('cube', 'purple', 'md') }}
-                        <div class="list-body">
-                            <div class="list-title">Product</div>
-                            <div class="list-subtitle">6 skills · Strategy & research</div>
-                        </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
-
-                    <div class="list-item">
-                        {{ avatar.render('users', 'orange', 'md') }}
-                        <div class="list-body">
-                            <div class="list-title">Sales</div>
-                            <div class="list-subtitle">4 skills · Customer engagement</div>
-                        </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
+                    {% endfor %}
                 </div>
 
                 <div class="panel panel-list">
@@ -758,119 +758,23 @@
                         </a>
                     </div>
 
-                    <div class="list-item">
-                        <span class="list-icon blue">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="list-title">compile_trello_notes</div>
-                            <div class="list-subtitle">Summarize and structure Trello board notes</div>
-                            <div class="list-meta">v1.3.2 · 2 hours ago</div>
-                        </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="list-title">review_backend_task</div>
-                            <div class="list-subtitle">Analyze backend tasks and suggest next steps</div>
-                            <div class="list-meta">v0.9.1 · 5 hours ago</div>
-                        </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon orange">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="list-title">investigate_api_bug</div>
-                            <div class="list-subtitle">Deep dive into API errors and suggest fixes</div>
-                            <div class="list-meta">v1.0.0 · 1 day ago</div>
-                        </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon purple">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="list-title">create_product_brief</div>
-                            <div class="list-subtitle">Generate a product brief from notes</div>
-                            <div class="list-meta">v0.8.4 · 2 days ago</div>
-                        </div>
-                        <span class="list-more">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </span>
+                    <div class="panel-empty">
+                        <p class="panel-empty-title">Coming soon</p>
+                        <p class="panel-empty-text">Recently updated skills will show up here.</p>
                     </div>
                 </div>
 
                 <div class="panel panel-list">
                     <div class="panel-header">
                         <h2>Recent Activity</h2>
-                        <a href="#">View all
+                        <a href="{{ path('app_activity') }}">View all
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                         </a>
                     </div>
 
-                    <div class="list-item">
-                        <span class="list-icon blue">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="activity-text"><strong>Alex Chen</strong> updated compile_trello_notes</div>
-                            <div class="list-meta">2 hours ago</div>
-                        </div>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="activity-text"><strong>Taylor Kim</strong> approved review_backend_task</div>
-                            <div class="list-meta">5 hours ago</div>
-                        </div>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon orange">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="activity-text"><strong>Jordan Patel</strong> requested approval for analyze_sales_calls</div>
-                            <div class="list-meta">1 day ago</div>
-                        </div>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon purple">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v5"/><path d="M15 2v5"/><path d="M7 7h10v4a5 5 0 0 1-10 0z"/><path d="M12 16v5"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="activity-text"><strong>Alex Chen</strong> connected Google Drive integration</div>
-                            <div class="list-meta">2 days ago</div>
-                        </div>
-                    </div>
-
-                    <div class="list-item">
-                        <span class="list-icon green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        </span>
-                        <div class="list-body">
-                            <div class="activity-text"><strong>Taylor Kim</strong> published customer_summary to public gallery</div>
-                            <div class="list-meta">2 days ago</div>
-                        </div>
+                    <div class="panel-empty">
+                        <p class="panel-empty-title">Coming soon</p>
+                        <p class="panel-empty-text">A log of who changed what will show up here.</p>
                     </div>
                 </div>
             </section>
@@ -878,7 +782,7 @@
             <section class="panel integrations-panel">
                 <div class="panel-header">
                     <h2>Integrations</h2>
-                    <a href="#">View all
+                    <a href="{{ path('app_integrations') }}">View all
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                 </div>

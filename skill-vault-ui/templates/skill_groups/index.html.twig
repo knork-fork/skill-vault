@@ -269,6 +269,24 @@
         color: var(--danger);
     }
 
+    .row-menu-panel select.menu-select {
+        width: 100%;
+        background: none;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 7px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        cursor: pointer;
+        appearance: none;
+    }
+
+    .row-menu-panel select.menu-select:hover {
+        background: var(--surface-raised);
+        color: var(--text);
+    }
+
     .empty-state {
         padding: 30px 10px;
         text-align: center;
@@ -628,6 +646,8 @@
                                     </div>
                                 </div>
                             </div>
+                        {% else %}
+                            <div class="empty-state">No skill groups available, please add new ones.</div>
                         {% endfor %}
                     </div>
 
@@ -647,7 +667,7 @@
                                     <div class="skill-desc">{{ skill.description }}</div>
                                 </div>
                                 <label class="toggle">
-                                    <input type="checkbox" {{ skill.enabled ? 'checked' : '' }}>
+                                    <input type="checkbox" checked>
                                     <span class="toggle-track"></span>
                                 </label>
                                 <div class="row-menu">
@@ -655,11 +675,27 @@
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                                     </button>
                                     <div class="row-menu-panel">
-                                        <button type="button" data-action="move">Move to group</button>
-                                        <button type="button" class="danger" data-action="delete">Delete skill</button>
+                                        <form method="post" action="{{ path('app_skill_move_to_group') }}" style="display:contents;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('move_skill') }}">
+                                            <input type="hidden" name="slug" value="{{ skill.slug }}">
+                                            <input type="hidden" name="redirect" value="skill_groups">
+                                            <select name="group" class="menu-select" onchange="this.form.submit()">
+                                                <option value="" selected>Move to group…</option>
+                                                {% for group in groups %}
+                                                    <option value="{{ group.name }}">{{ group.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                        <form method="post" action="{{ path('app_skill_delete', {slug: skill.slug}) }}" onsubmit="return confirm('Delete this skill? This cannot be undone.');" style="display:contents;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_skill') }}">
+                                            <input type="hidden" name="redirect" value="skill_groups">
+                                            <button type="submit" class="danger">Delete skill</button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
+                        {% else %}
+                            <div class="empty-state">No ungrouped skills.</div>
                         {% endfor %}
                     </div>
                 </div>
@@ -680,7 +716,11 @@
             </button>
         </div>
 
-        <form id="createGroupForm">
+        <form method="post" action="{{ path('app_skill_groups_create') }}" id="createGroupForm">
+            <input type="hidden" name="_token" value="{{ csrf_token('create_group') }}">
+            <input type="hidden" name="icon" id="selectedIconInput" value="{{ iconOptions[0].key }}">
+            <input type="hidden" name="color" id="selectedColorInput" value="{{ colorOptions[0].key }}">
+
             <div class="modal-preview">
                 {{ avatar.render(iconOptions[0].key, colorOptions[0].key, 'lg') }}
                 <span class="modal-preview-text">Preview</span>
@@ -688,12 +728,12 @@
 
             <div class="field">
                 <label for="groupName">Name</label>
-                <input type="text" id="groupName" placeholder="e.g. Marketing" required>
+                <input type="text" id="groupName" name="name" placeholder="e.g. Marketing" required>
             </div>
 
             <div class="field">
                 <label for="groupDescription">Description</label>
-                <textarea id="groupDescription" placeholder="What is this group for?"></textarea>
+                <textarea id="groupDescription" name="description" placeholder="What is this group for?"></textarea>
             </div>
 
             <div class="field">
@@ -738,8 +778,9 @@
     var preview = modal.querySelector('.modal-preview .group-avatar');
     var groupList = document.getElementById('groupList');
     var groupCountLabel = document.getElementById('groupCountLabel');
+    var selectedIconInput = document.getElementById('selectedIconInput');
+    var selectedColorInput = document.getElementById('selectedColorInput');
 
-    var selectedIcon = iconGrid.querySelector('.icon-option.selected').dataset.icon;
     var selectedColor = colorGrid.querySelector('.color-option.selected').dataset.color;
 
     function openModal() {
@@ -773,7 +814,7 @@
             el.classList.remove('selected');
         });
         btn.classList.add('selected');
-        selectedIcon = btn.dataset.icon;
+        selectedIconInput.value = btn.dataset.icon;
 
         var svg = btn.querySelector('svg').cloneNode(true);
         preview.innerHTML = '';
@@ -790,85 +831,17 @@
         });
         btn.classList.add('selected');
         selectedColor = btn.dataset.color;
+        selectedColorInput.value = btn.dataset.color;
         updatePreview();
-    });
-
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        var name = document.getElementById('groupName').value.trim();
-        var description = document.getElementById('groupDescription').value.trim();
-        if (!name) {
-            return;
-        }
-
-        var iconSvg = iconGrid.querySelector('.icon-option.selected svg').cloneNode(true);
-
-        var row = document.createElement('div');
-        row.className = 'group-row';
-        row.dataset.name = name.toLowerCase();
-        row.dataset.access = 'private';
-        row.dataset.status = 'enabled';
-        row.dataset.skills = '0';
-
-        var avatarSpan = document.createElement('span');
-        avatarSpan.className = 'group-avatar avatar-color-' + selectedColor + ' avatar-size-md';
-        avatarSpan.appendChild(iconSvg);
-
-        row.innerHTML =
-            '<div class="group-info">' +
-                '<div class="group-name"></div>' +
-                '<div class="group-desc"></div>' +
-                '<div class="group-skill-count">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' +
-                    '0 skills' +
-                '</div>' +
-            '</div>' +
-            '<div class="group-access">' +
-                '<span class="access-badge private">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
-                    'Private' +
-                '</span>' +
-                '<span class="access-scope">Only me (Writable)</span>' +
-            '</div>' +
-            '<div class="group-status">' +
-                '<label class="toggle-row on">' +
-                    '<span class="toggle">' +
-                        '<input type="checkbox" checked class="enable-toggle">' +
-                        '<span class="toggle-track"></span>' +
-                    '</span>' +
-                    '<span>' +
-                        '<span class="toggle-label">Enabled</span>' +
-                        '<span class="toggle-caption">Available to Claude</span>' +
-                    '</span>' +
-                '</label>' +
-            '</div>' +
-            '<div class="row-menu">' +
-                '<button type="button" class="row-menu-btn" aria-label="More options">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>' +
-                '</button>' +
-                '<div class="row-menu-panel">' +
-                    '<button type="button" data-action="rename">Rename</button>' +
-                    '<button type="button" data-action="move">Manage skills</button>' +
-                    '<button type="button" class="danger" data-action="delete">Delete group</button>' +
-                '</div>' +
-            '</div>';
-
-        row.querySelector('.group-name').textContent = name;
-        row.querySelector('.group-desc').textContent = description;
-        row.insertBefore(avatarSpan, row.firstChild);
-
-        groupList.insertBefore(row, groupList.firstChild);
-        groupCountLabel.textContent = groupList.children.length;
-
-        closeModal();
     });
 
     // Row kebab menus (event delegation covers rows added after page load)
     document.addEventListener('click', function (event) {
         var menuBtn = event.target.closest('.row-menu-btn');
+        var panel = event.target.closest('.row-menu-panel');
         document.querySelectorAll('.row-menu.open').forEach(function (menu) {
-            if (!menuBtn || menu !== menuBtn.closest('.row-menu')) {
+            var keepOpen = (menuBtn && menu === menuBtn.closest('.row-menu')) || (panel && menu.contains(panel));
+            if (!keepOpen) {
                 menu.classList.remove('open');
             }
         });

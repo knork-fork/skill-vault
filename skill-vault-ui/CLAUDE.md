@@ -24,11 +24,20 @@ does `docker exec ... <tool>`), so the containers must be up first (`docker comp
 ## Database
 
 Postgres runs as the `db` service in the root `docker-compose.yml` (host port 20102, container name
-`skill-vault-mcp-db`). The schema is **not** managed by Doctrine migrations — it's owned by
-`skill-vault-mcp-server/db/schema.sql` and loaded via `db/init-db.sh` at the repo root (which drops and
+`skill-vault-mcp-db`). The schema is **not** managed by Doctrine migrations — it's owned by the shared
+`db/schema.sql` at the repo root and loaded via `db/init-db.sh` (also at the repo root, which drops and
 recreates the whole database, so only run it deliberately). `DATABASE_URL` in `.env` points at the `db`
-container. Doctrine entities in `src/Entity/` map onto those hand-written tables — when changing a column,
-edit `schema.sql` and the entity mapping together; `doctrine:schema:update` is not used to migrate.
+container. Doctrine entities in `src/Entity/` map onto those hand-written tables (`users`, `skill_groups`) —
+when changing a column, edit `schema.sql` and the entity mapping together; `doctrine:schema:update` is not
+used to migrate.
+
+## Resources (skills & tools on disk)
+
+Skills and tools are files under the repo-root `resources/` directory (format in `docs/Skills_vs_Tools.md`),
+mounted into the `php-fpm-ui` container at `/resources` (see `RESOURCES_DIR` in `.env` and
+`app.resources_dir` in `config/services.yaml`). `src/Skill/SkillFileRepository.php` and
+`src/Tool/ToolFileRepository.php` read (and, for skills, write) that directory directly — there's no
+database table for skills/tools themselves, only for `skill_groups`.
 
 ## Auth architecture
 

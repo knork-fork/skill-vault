@@ -16,8 +16,12 @@ parameters:
         # Doctrine sets these via reflection (id) or via the form's data_class binding
         # (username/password/firstName/lastName) rather than through the constructor.
         - identifier: property.uninitialized
-          path: src/Entity/User.php
+          paths:
+              - src/Entity/User.php
+              - src/Entity/SkillGroup.php
         - identifier: property.unusedType
-          path: src/Entity/User.php
+          paths:
+              - src/Entity/User.php
+              - src/Entity/SkillGroup.php
         - identifier: return.type
           path: src/Entity/User.php

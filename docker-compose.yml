@@ -34,6 +34,7 @@ services:
         volumes:
             - './skill-vault-ui:/application'
             - './docs:/application/docs:ro'
+            - './resources:/resources'
             - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/fpm/conf.d/99-overrides.ini'
             - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/cli/conf.d/99-overrides.ini'
 

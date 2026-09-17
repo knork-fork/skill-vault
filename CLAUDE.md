@@ -5,10 +5,15 @@ This project is a Skill Vault for creating, organizing, versioning and managing 
 This repo holds two **separate, independently deployed services** — not a frontend/backend split of one
 app. Each is its own full-stack PHP/Symfony application (its own `src/`, `public/`, config, tests, containers)
 with its own persistence concerns. They only share the same Postgres database (see `resources/`) and
-`schema.sql`; they do not share code.
+`db/schema.sql`; they do not share code.
 
 - `resources/` - gitignored files for storing user data, skills, tools and other resources. This is where the
   Skill Vault stores its data.
+- `db/` - shared Postgres schema and tooling (`schema.sql`, `init-db.sh`, `psql`) used by both services'
+  php-fpm containers via the common `skill-vault-mcp-db` database — even though today only `skill-vault-ui`'s
+  php-fpm actually persists application data (`users`, `skill_groups`) there. The schema is hand-written, not
+  managed by Doctrine migrations; `init-db.sh` drops and recreates the whole database, so only run it
+  deliberately.
 - `skill-vault-mcp-server/` - the MCP server: serves and handles MCP requests, lists tools and skills, manages
   user auth, executes skills and tools. Has no UI of its own.
 - `skill-vault-ui/` - the web UI application (Symfony, server-rendered Twig templates, no separate JS

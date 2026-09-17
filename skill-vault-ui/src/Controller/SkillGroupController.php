@@ -5,100 +5,60 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Avatar\AvatarPalette;
+use App\Entity\SkillGroup;
 use App\Entity\User;
+use App\Repository\SkillGroupRepository;
+use App\Skill\SkillFileRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 final class SkillGroupController extends AbstractController
 {
-    #[Route(path: '/skill-groups', name: 'app_skill_groups', methods: ['GET'])]
-    public function __invoke(#[CurrentUser] User $user): Response
-    {
-        $groups = [
-            [
-                'name' => 'Trello Workflows',
-                'description' => 'Project management skills for Trello automation and workflows.',
-                'icon' => 'trello',
-                'color' => 'blue',
-                'skillCount' => 5,
-                'access' => ['type' => 'public', 'label' => 'Public', 'scope' => 'All users (Read-only)'],
-                'enabled' => true,
-            ],
-            [
-                'name' => 'Backend',
-                'description' => 'Backend development, APIs, databases, and cloud infrastructure.',
-                'icon' => 'terminal',
-                'color' => 'green',
-                'skillCount' => 8,
-                'access' => ['type' => 'private', 'label' => 'Private', 'scope' => 'Only me (Writable)'],
-                'enabled' => true,
-            ],
-            [
-                'name' => 'Product',
-                'description' => 'Product strategy, user research, and roadmap planning.',
-                'icon' => 'cube',
-                'color' => 'purple',
-                'skillCount' => 6,
-                'access' => ['type' => 'workspace', 'label' => 'Workspace', 'scope' => 'Editors (Writable)'],
-                'enabled' => true,
-            ],
-            [
-                'name' => 'Sales',
-                'description' => 'Sales processes, outreach, and customer engagement.',
-                'icon' => 'users',
-                'color' => 'orange',
-                'skillCount' => 4,
-                'access' => ['type' => 'public', 'label' => 'Public', 'scope' => 'All users (Read-only)'],
-                'enabled' => false,
-            ],
-            [
-                'name' => 'Research',
-                'description' => 'Research methods, analysis, and information synthesis.',
-                'icon' => 'chart',
-                'color' => 'red',
-                'skillCount' => 7,
-                'access' => ['type' => 'workspace', 'label' => 'Workspace', 'scope' => 'Viewers (Read-only)'],
-                'enabled' => true,
-            ],
-            [
-                'name' => 'Personal',
-                'description' => 'Personal productivity, notes, and custom experiments.',
-                'icon' => 'heart',
-                'color' => 'teal',
-                'skillCount' => 3,
-                'access' => ['type' => 'private', 'label' => 'Private', 'scope' => 'Only me (Writable)'],
-                'enabled' => true,
-            ],
-        ];
+    public function __construct(
+        private readonly SkillGroupRepository $skillGroups,
+        private readonly SkillFileRepository $skills,
+        private readonly EntityManagerInterface $entityManager,
+    ) {
+    }
 
-        $ungroupedSkills = [
-            [
-                'name' => 'compile_trello_notes',
-                'description' => 'Summarize and structure Trello board notes',
-                'icon' => 'doc',
-                'enabled' => true,
-            ],
-            [
-                'name' => 'review_backend_task',
-                'description' => 'Analyze backend tasks and suggest next steps',
-                'icon' => 'code',
-                'enabled' => true,
-            ],
-            [
-                'name' => 'investigate_api_bug',
-                'description' => 'Deep dive into API errors and suggest fixes',
-                'icon' => 'bug',
-                'enabled' => false,
-            ],
-            [
-                'name' => 'create_product_brief',
-                'description' => 'Generate a product brief from notes',
-                'icon' => 'doc',
-                'enabled' => true,
-            ],
-        ];
+    #[Route(path: '/skill-groups', name: 'app_skill_groups', methods: ['GET'])]
+    public function index(#[CurrentUser] User $user): Response
+    {
+        $skills = $this->skills->findAll();
+
+        $groups = array_map(
+            static function (SkillGroup $group) use ($skills): array {
+                $skillCount = 0;
+                foreach ($skills as $skill) {
+                    if ($skill['group'] === $group->getName()) {
+                        ++$skillCount;
+                    }
+                }
+
+                return [
+                    'name' => $group->getName(),
+                    'description' => $group->getDescription(),
+                    'icon' => $group->getIcon(),
+                    'color' => $group->getColor(),
+                    'skillCount' => $skillCount,
+                    // Access control and per-group enablement aren't implemented yet — every
+                    // group is displayed as public/editable/enabled for now.
+                    'access' => ['type' => 'public', 'label' => 'Public', 'scope' => 'All users (Writable)'],
+                    'enabled' => true,
+                ];
+            },
+            $this->skillGroups->findAll(),
+        );
+
+        $ungroupedSkills = array_values(array_filter(
+            $skills,
+            static fn (array $skill): bool => $skill['group'] === null,
+        ));
 
         return $this->render('skill_groups/index.html.twig', [
             'user' => $user,
@@ -107,5 +67,63 @@ final class SkillGroupController extends AbstractController
             'iconOptions' => AvatarPalette::ICONS,
             'colorOptions' => AvatarPalette::COLORS,
         ]);
+    }
+
+    #[Route(path: '/skill-groups', name: 'app_skill_groups_create', methods: ['POST'])]
+    public function create(Request $request): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('create_group', $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $name = trim($request->request->getString('name'));
+        if ($name === '' || $this->skillGroups->findOneByName($name) !== null) {
+            return $this->redirectToRoute('app_skill_groups');
+        }
+
+        $group = new SkillGroup();
+        $group->setName($name);
+        $group->setDescription(trim($request->request->getString('description')) ?: null);
+        $group->setIcon($request->request->getString('icon', 'folder'));
+        $group->setColor($request->request->getString('color', 'blue'));
+
+        $this->entityManager->persist($group);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('app_skill_groups');
+    }
+
+    #[Route(path: '/skill-groups/move-skill', name: 'app_skill_move_to_group', methods: ['POST'])]
+    public function moveSkill(Request $request): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('move_skill', $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $slug = $request->request->getString('slug');
+        $skill = $this->skills->findBySlug($slug);
+        if ($skill === null) {
+            throw $this->createNotFoundException('Skill not found.');
+        }
+
+        $group = trim($request->request->getString('group'));
+        if ($group !== '' && $this->skillGroups->findOneByName($group) === null) {
+            $group = '';
+        }
+
+        $this->skills->save($slug, [
+            'name' => \is_string($skill['name']) ? $skill['name'] : $slug,
+            'description' => \is_string($skill['description']) ? $skill['description'] : '',
+            'group' => $group !== '' ? $group : null,
+            'icon' => \is_string($skill['icon']) ? $skill['icon'] : 'folder',
+            'color' => \is_string($skill['color']) ? $skill['color'] : 'blue',
+            'content' => \is_string($skill['content']) ? $skill['content'] : '',
+        ]);
+
+        $redirect = $request->request->getString('redirect');
+
+        return $redirect === 'skill'
+            ? $this->redirectToRoute('app_skill', ['slug' => $slug])
+            : $this->redirectToRoute('app_skill_groups');
     }
 }

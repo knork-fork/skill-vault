@@ -9,4 +9,10 @@ chown -R www-data:www-data /application/var
 mkdir -p /var/log
 chown -R www-data:www-data /var/log
 
+# The resources/ dir is a host bind mount owned by whichever user built it there,
+# which usually isn't www-data - fix it up so skill/tool writes don't hit EACCES.
+if [ -d /resources ]; then
+    chown -R www-data:www-data /resources
+fi
+
 exec "$@"
