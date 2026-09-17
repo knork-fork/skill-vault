@@ -121,11 +121,25 @@
         background: var(--surface-raised);
     }
 
+    .group-skill-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+        color: inherit;
+        text-decoration: none;
+    }
+
     .group-skill-name {
         flex: 1;
         font-size: 0.88rem;
         font-weight: 600;
         color: var(--text);
+    }
+
+    .group-skill-link:hover .group-skill-name {
+        color: var(--accent);
     }
 
     .remove-from-group-btn {
@@ -428,6 +442,16 @@
         border-top: none;
     }
 
+    .skill-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+        color: inherit;
+        text-decoration: none;
+    }
+
     .skill-body {
         flex: 1;
         min-width: 0;
@@ -438,6 +462,10 @@
         font-weight: 700;
         color: var(--text);
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .skill-link:hover .skill-name {
+        color: var(--accent);
     }
 
     .skill-desc {
@@ -736,7 +764,10 @@
                                         <div class="row-menu-panel">
                                             <button type="button" data-action="rename">Rename</button>
                                             <button type="button" data-action="move">Manage skills</button>
-                                            <button type="button" class="danger" data-action="delete">Delete group</button>
+                                            <form method="post" action="{{ path('app_skill_groups_delete', {name: group.name}) }}" onsubmit="return confirm('Delete this group? Skills in it will become ungrouped. This cannot be undone.');" style="display:contents;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_group') }}">
+                                                <button type="submit" class="danger">Delete group</button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -746,8 +777,10 @@
                                         <div class="group-skills-list">
                                             {% for skill in group.skills %}
                                                 <div class="group-skill-item">
-                                                    {{ avatar.render(skill.icon, skill.color, 'sm') }}
-                                                    <span class="group-skill-name">{{ skill.name }}</span>
+                                                    <a href="{{ path('app_skill', {slug: skill.slug}) }}" class="group-skill-link">
+                                                        {{ avatar.render(skill.icon, skill.color, 'sm') }}
+                                                        <span class="group-skill-name">{{ skill.name }}</span>
+                                                    </a>
                                                     <label class="toggle">
                                                         <input type="checkbox" checked class="skill-enable-toggle" autocomplete="off">
                                                         <span class="toggle-track"></span>
@@ -782,11 +815,13 @@
                     <div class="skill-list">
                         {% for skill in ungroupedSkills %}
                             <div class="skill-row">
-                                {{ avatar.render(skill.icon, skill.color, 'md') }}
-                                <div class="skill-body">
-                                    <div class="skill-name">{{ skill.name }}</div>
-                                    <div class="skill-desc">{{ skill.description }}</div>
-                                </div>
+                                <a href="{{ path('app_skill', {slug: skill.slug}) }}" class="skill-link">
+                                    {{ avatar.render(skill.icon, skill.color, 'md') }}
+                                    <div class="skill-body">
+                                        <div class="skill-name">{{ skill.name }}</div>
+                                        <div class="skill-desc">{{ skill.description }}</div>
+                                    </div>
+                                </a>
                                 <label class="toggle-row skill-status on">
                                     <span class="toggle">
                                         <input type="checkbox" checked class="enable-toggle" autocomplete="off">
@@ -904,7 +939,6 @@
     var colorGrid = document.getElementById('colorGrid');
     var preview = modal.querySelector('.modal-preview .group-avatar');
     var groupList = document.getElementById('groupList');
-    var groupCountLabel = document.getElementById('groupCountLabel');
     var selectedIconInput = document.getElementById('selectedIconInput');
     var selectedColorInput = document.getElementById('selectedColorInput');
 
@@ -975,13 +1009,6 @@
         if (menuBtn) {
             menuBtn.closest('.row-menu').classList.toggle('open');
             return;
-        }
-        if (event.target.closest('.row-menu-panel button[data-action="delete"]')) {
-            var row = event.target.closest('.group-item, .skill-row');
-            if (row) {
-                row.remove();
-                groupCountLabel.textContent = groupList.children.length;
-            }
         }
     });
 

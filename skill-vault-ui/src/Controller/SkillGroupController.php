@@ -92,6 +92,41 @@ final class SkillGroupController extends AbstractController
         return $this->redirectToRoute('app_skill_groups');
     }
 
+    #[Route(path: '/skill-groups/{name}/delete', name: 'app_skill_groups_delete', methods: ['POST'])]
+    public function delete(Request $request, string $name): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('delete_group', $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $group = $this->skillGroups->findOneByName($name);
+        if ($group === null) {
+            throw $this->createNotFoundException('Skill group not found.');
+        }
+
+        foreach ($this->skills->findAll() as $skill) {
+            if ($skill['group'] !== $name) {
+                continue;
+            }
+
+            $slug = \is_string($skill['slug']) ? $skill['slug'] : '';
+
+            $this->skills->save($slug, [
+                'name' => \is_string($skill['name']) ? $skill['name'] : $slug,
+                'description' => \is_string($skill['description']) ? $skill['description'] : '',
+                'group' => null,
+                'icon' => \is_string($skill['icon']) ? $skill['icon'] : 'folder',
+                'color' => \is_string($skill['color']) ? $skill['color'] : 'blue',
+                'content' => \is_string($skill['content']) ? $skill['content'] : '',
+            ]);
+        }
+
+        $this->entityManager->remove($group);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('app_skill_groups');
+    }
+
     #[Route(path: '/skill-groups/move-skill', name: 'app_skill_move_to_group', methods: ['POST'])]
     public function moveSkill(Request $request): RedirectResponse
     {
