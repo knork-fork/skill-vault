@@ -83,6 +83,10 @@
     }
 
     .user-menu {
+        position: relative;
+    }
+
+    .user-menu-btn {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -90,9 +94,50 @@
         color: var(--text);
         padding: 5px 10px 5px 5px;
         border-radius: 26px;
+        background: none;
+        border: none;
+        font: inherit;
+        cursor: pointer;
     }
 
-    .user-menu:hover {
+    .user-menu-btn:hover {
+        background: var(--surface-raised);
+    }
+
+    .user-menu-panel {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 56px;
+        z-index: 5;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(20,30,60,0.14);
+        min-width: 150px;
+        padding: 6px;
+    }
+
+    .user-menu.open .user-menu-panel {
+        display: block;
+    }
+
+    .user-menu-panel a {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 9px 12px;
+        border-radius: 6px;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .user-menu-panel a:hover {
         background: var(--surface-raised);
     }
 

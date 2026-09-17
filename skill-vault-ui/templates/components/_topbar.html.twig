@@ -18,11 +18,32 @@
                 <span class="dot"></span>
             </a>
 
-            <a href="#" class="user-menu">
-                <span class="avatar">{{ (user.firstName|first ~ user.lastName|first)|upper }}</span>
-                <span class="name">{{ user.firstName }} {{ user.lastName }}</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </a>
+            <div class="user-menu">
+                <button type="button" class="user-menu-btn" id="userMenuBtn">
+                    <span class="avatar">{{ (user.firstName|first ~ user.lastName|first)|upper }}</span>
+                    <span class="name">{{ user.firstName }} {{ user.lastName }}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="user-menu-panel">
+                    <a href="{{ path('app_logout') }}">Log out</a>
+                </div>
+            </div>
         </div>
     </header>
+
+    <script>
+        (function () {
+            var menuBtn = document.getElementById('userMenuBtn');
+            menuBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                menuBtn.closest('.user-menu').classList.toggle('open');
+            });
+            document.addEventListener('click', function (event) {
+                if (event.target.closest('.user-menu-panel')) {
+                    return;
+                }
+                menuBtn.closest('.user-menu').classList.remove('open');
+            });
+        })();
+    </script>
 {% endmacro %}
