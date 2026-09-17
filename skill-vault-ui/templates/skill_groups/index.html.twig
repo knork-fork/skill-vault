@@ -9,125 +9,13 @@
 {% include 'components/_avatar_styles.html.twig' %}
 {% include 'components/_shell_styles.html.twig' %}
 {% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
 <style>
     .content {
         padding: 0 40px 40px;
         display: flex;
         flex-direction: column;
         gap: 20px;
-    }
-
-    .page-hero {
-        margin: 0 -40px;
-        padding: 22px 40px 4px;
-        background: radial-gradient(900px 260px at 15% 0%, rgba(43, 82, 224, 0.09), transparent 65%), var(--bg);
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .breadcrumb {
-        font-size: 0.88rem;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .breadcrumb a {
-        color: var(--text-muted);
-        text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-        color: var(--text);
-    }
-
-    .page-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 24px;
-    }
-
-    .page-header h1 {
-        margin: 4px 0 6px;
-        font-size: 2.1rem;
-        letter-spacing: -0.03em;
-        font-weight: 800;
-    }
-
-    .page-header p {
-        margin: 0;
-        color: var(--text-muted);
-        max-width: 640px;
-        line-height: 1.5;
-    }
-
-    .btn-icon {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        width: auto;
-        padding: 12px 18px;
-    }
-
-    .btn-icon svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .toolbar {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .search-input {
-        flex: 1;
-        max-width: 420px;
-        height: 42px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 0 14px;
-    }
-
-    .search-input svg {
-        width: 18px;
-        height: 18px;
-        color: var(--text-muted);
-        flex-shrink: 0;
-    }
-
-    .search-input input {
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 0.92rem;
-        color: var(--text);
-        width: 100%;
-        height: 100%;
-    }
-
-    .filter-select {
-        appearance: none;
-        height: 42px;
-        box-sizing: border-box;
-        background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6784' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;
-        background-size: 16px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 0 32px 0 14px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: var(--text-soft);
-        cursor: pointer;
     }
 
     .layout-grid {

@@ -9,6 +9,7 @@
 {% include 'components/_avatar_styles.html.twig' %}
 {% include 'components/_shell_styles.html.twig' %}
 {% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
 <style>
     .content {
         padding: 0 40px 60px;
@@ -17,30 +18,10 @@
         gap: 20px;
     }
 
+    /* Tighter than the shared default: this page only wraps a breadcrumb
+       and a slim back-link/actions row, not a full title+toolbar block. */
     .page-hero {
-        margin: 0 -40px;
-        padding: 22px 40px 4px;
-        background: radial-gradient(900px 260px at 15% 0%, rgba(43, 82, 224, 0.09), transparent 65%), var(--bg);
-        display: flex;
-        flex-direction: column;
         gap: 12px;
-    }
-
-    .breadcrumb {
-        font-size: 0.88rem;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .breadcrumb a {
-        color: var(--text-muted);
-        text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-        color: var(--text);
     }
 
     .skill-page {
@@ -166,6 +147,7 @@
         font-size: 1.5rem;
         font-weight: 800;
         letter-spacing: -0.01em;
+        text-align: left;
     }
 
     .skill-header p {
