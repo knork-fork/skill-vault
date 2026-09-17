@@ -1,5 +1,13 @@
 This project is a Skill Vault for creating, organizing, versioning and managing access to shared and personal AI skills through a web UI. Users can choose which skills or skill groups are exposed to Claude through MCP, either directly or through a lightweight router, and optionally connect services such as Trello and Google Drive so skills can work with external data using each user’s own access.
 
+## Repository structure
+
+- resources/ - contains gitignored files for storing user data, skills, tools and other resources. This is where the Skill Vault stores its data.
+- skill-vault-mcp-server/ - serves and handles MCP requests, lists tools and skills, manages user auth, executes skills and tools
+- skill-vault-ui/ - web UI for managing skills, skill groups, and user access
+
+Critical: never explore unrelated directories when prompted to specifically work with a target directory.
+
 ## Definition of done
 
 This list is provided as context on what the project is intended to accomplish. It is not a strict checklist, but rather a set of goals to guide development.
