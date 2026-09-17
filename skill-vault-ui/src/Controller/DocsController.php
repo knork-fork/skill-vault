@@ -7,15 +7,22 @@ namespace App\Controller;
 use App\Entity\User;
 use League\CommonMark\CommonMarkConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 final class DocsController extends AbstractController
 {
+    public function __construct(
+        #[Autowire(param: 'kernel.project_dir')]
+        private readonly string $projectDir,
+    ) {
+    }
+
     private function docsDir(): string
     {
-        return $this->getParameter('kernel.project_dir').'/docs';
+        return $this->projectDir . '/docs';
     }
 
     private function titleFor(string $slug): string
@@ -34,7 +41,7 @@ final class DocsController extends AbstractController
         }
 
         $articles = [];
-        foreach (glob($dir.'/*.md') ?: [] as $path) {
+        foreach (glob($dir . '/*.md') ?: [] as $path) {
             $slug = basename($path, '.md');
 
             $articles[] = [
@@ -60,7 +67,7 @@ final class DocsController extends AbstractController
     #[Route(path: '/docs/{slug}', name: 'app_docs_show', methods: ['GET'])]
     public function show(#[CurrentUser] User $user, string $slug): Response
     {
-        $path = $this->docsDir().'/'.$slug.'.md';
+        $path = $this->docsDir() . '/' . $slug . '.md';
         if (!is_file($path)) {
             throw $this->createNotFoundException('Article not found.');
         }

@@ -35,7 +35,7 @@ final class QuoteRepository
      */
     private function findAll(): array
     {
-        $file = $this->projectDir.'/config/quotes.json';
+        $file = $this->projectDir . '/config/quotes.json';
         if (!is_file($file)) {
             return [];
         }

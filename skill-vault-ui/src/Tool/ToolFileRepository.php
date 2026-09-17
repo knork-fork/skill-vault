@@ -24,13 +24,13 @@ final class ToolFileRepository
      */
     public function findAll(): array
     {
-        $toolsDir = $this->resourcesDir.'/tools';
+        $toolsDir = $this->resourcesDir . '/tools';
         if (!is_dir($toolsDir)) {
             return [];
         }
 
         $tools = [];
-        foreach (glob($toolsDir.'/*', \GLOB_ONLYDIR) ?: [] as $dir) {
+        foreach (glob($toolsDir . '/*', \GLOB_ONLYDIR) ?: [] as $dir) {
             $tool = $this->loadDirectory($dir);
             if ($tool !== null) {
                 $tools[] = $tool;
@@ -61,7 +61,7 @@ final class ToolFileRepository
      */
     private function loadDirectory(string $dir): ?array
     {
-        $toolFile = $dir.'/tool.yaml';
+        $toolFile = $dir . '/tool.yaml';
         if (!is_file($toolFile)) {
             return null;
         }

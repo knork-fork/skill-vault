@@ -34,7 +34,7 @@ final class SkillFileRepository
      */
     public function findAll(): array
     {
-        $skillsDir = $this->resourcesDir.'/skills';
+        $skillsDir = $this->resourcesDir . '/skills';
         if (!is_dir($skillsDir)) {
             return [];
         }
@@ -45,7 +45,7 @@ final class SkillFileRepository
         );
 
         $skills = [];
-        foreach (glob($skillsDir.'/*', \GLOB_ONLYDIR) ?: [] as $dir) {
+        foreach (glob($skillsDir . '/*', \GLOB_ONLYDIR) ?: [] as $dir) {
             $skill = $this->loadDirectory($dir, $validGroupNames);
             if ($skill !== null) {
                 $skills[] = $skill;
@@ -76,8 +76,8 @@ final class SkillFileRepository
      */
     public function save(string $slug, array $data): void
     {
-        $dir = $this->resourcesDir.'/skills/'.$slug;
-        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+        $dir = $this->resourcesDir . '/skills/' . $slug;
+        if (!is_dir($dir) && !mkdir($dir, 0o775, true) && !is_dir($dir)) {
             throw new RuntimeException(\sprintf('Could not create skill directory "%s".', $dir));
         }
 
@@ -92,13 +92,13 @@ final class SkillFileRepository
             $metadata['group'] = $data['group'];
         }
 
-        file_put_contents($dir.'/metadata.yaml', Yaml::dump($metadata));
-        file_put_contents($dir.'/skill.md', $data['content']);
+        file_put_contents($dir . '/metadata.yaml', Yaml::dump($metadata));
+        file_put_contents($dir . '/skill.md', $data['content']);
     }
 
     public function delete(string $slug): void
     {
-        $dir = $this->resourcesDir.'/skills/'.$slug;
+        $dir = $this->resourcesDir . '/skills/' . $slug;
         if (!is_dir($dir)) {
             return;
         }
@@ -108,7 +108,9 @@ final class SkillFileRepository
             RecursiveIteratorIterator::CHILD_FIRST,
         );
         foreach ($files as $file) {
-            /** @var SplFileInfo $file */
+            if (!$file instanceof SplFileInfo) {
+                continue;
+            }
             $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
         }
 
@@ -122,8 +124,8 @@ final class SkillFileRepository
      */
     private function loadDirectory(string $dir, array $validGroupNames): ?array
     {
-        $metadataFile = $dir.'/metadata.yaml';
-        $contentFile = $dir.'/skill.md';
+        $metadataFile = $dir . '/metadata.yaml';
+        $contentFile = $dir . '/skill.md';
 
         if (!is_file($metadataFile) || !is_file($contentFile)) {
             return null;
@@ -153,7 +155,7 @@ final class SkillFileRepository
         if ($mtime === false) {
             $mtime = filemtime($metadataFile) ?: time();
         }
-        $modifiedAt = (new DateTimeImmutable())->setTimestamp($mtime);
+        $modifiedAt = new DateTimeImmutable()->setTimestamp($mtime);
 
         return [
             'slug' => $slug,
