@@ -8,6 +8,7 @@ use App\Entity\SkillGroup;
 use App\Entity\User;
 use App\Repository\SkillGroupRepository;
 use App\Skill\SkillFileRepository;
+use App\Support\QuoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,6 +19,7 @@ final class HomeController extends AbstractController
     public function __construct(
         private readonly SkillFileRepository $skills,
         private readonly SkillGroupRepository $skillGroups,
+        private readonly QuoteRepository $quotes,
     ) {
     }
 
@@ -51,6 +53,7 @@ final class HomeController extends AbstractController
             'totalSkills' => \count($skills),
             'totalGroups' => \count($groups),
             'topGroups' => $topGroups,
+            'quote' => $this->quotes->random(),
         ]);
     }
 }
