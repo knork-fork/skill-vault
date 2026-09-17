@@ -129,6 +129,9 @@
     }
 
     .remove-from-group-btn {
+        width: auto;
+        flex-shrink: 0;
+        margin-left: 14px;
         border: none;
         background: none;
         padding: 4px 8px;
@@ -292,6 +295,15 @@
         font-size: 0.78rem;
         font-weight: 500;
         color: var(--text-faint);
+    }
+
+    .skill-status {
+        flex: 0 0 150px;
+    }
+
+    .group-skill-item .toggle {
+        flex-shrink: 0;
+        margin-top: 6px;
     }
 
     .row-menu {
@@ -707,7 +719,7 @@
                                     <div class="group-status">
                                         <label class="toggle-row {{ group.enabled ? 'on' : '' }}">
                                             <span class="toggle">
-                                                <input type="checkbox" {{ group.enabled ? 'checked' : '' }} class="enable-toggle">
+                                                <input type="checkbox" {{ group.enabled ? 'checked' : '' }} class="enable-toggle" autocomplete="off">
                                                 <span class="toggle-track"></span>
                                             </span>
                                             <span>
@@ -736,6 +748,10 @@
                                                 <div class="group-skill-item">
                                                     {{ avatar.render(skill.icon, skill.color, 'sm') }}
                                                     <span class="group-skill-name">{{ skill.name }}</span>
+                                                    <label class="toggle">
+                                                        <input type="checkbox" checked class="skill-enable-toggle" autocomplete="off">
+                                                        <span class="toggle-track"></span>
+                                                    </label>
                                                     <form method="post" action="{{ path('app_skill_move_to_group') }}" style="display:contents;">
                                                         <input type="hidden" name="_token" value="{{ csrf_token('move_skill') }}">
                                                         <input type="hidden" name="slug" value="{{ skill.slug }}">
@@ -771,9 +787,15 @@
                                     <div class="skill-name">{{ skill.name }}</div>
                                     <div class="skill-desc">{{ skill.description }}</div>
                                 </div>
-                                <label class="toggle">
-                                    <input type="checkbox" checked>
-                                    <span class="toggle-track"></span>
+                                <label class="toggle-row skill-status on">
+                                    <span class="toggle">
+                                        <input type="checkbox" checked class="enable-toggle" autocomplete="off">
+                                        <span class="toggle-track"></span>
+                                    </span>
+                                    <span>
+                                        <span class="toggle-label">Enabled</span>
+                                        <span class="toggle-caption">Available to Claude</span>
+                                    </span>
                                 </label>
                                 <div class="row-menu">
                                     <button type="button" class="row-menu-btn" aria-label="More options">
@@ -963,17 +985,59 @@
         }
     });
 
-    // Enabled/disabled toggle labels
-    groupList.addEventListener('change', function (event) {
+    // Enabled/disabled toggle labels (group rows and ungrouped skill rows)
+    function setToggleRowState(toggleRow, state) {
+        toggleRow.classList.toggle('on', state === 'enabled');
+        toggleRow.classList.toggle('mixed', state === 'mixed');
+        toggleRow.querySelector('.enable-toggle').checked = state === 'enabled';
+        var label = state === 'enabled' ? 'Enabled' : (state === 'mixed' ? 'Mixed' : 'Disabled');
+        var caption = state === 'enabled' ? 'Available to Claude' : (state === 'mixed' ? 'Some skills available' : 'Not available to Claude');
+        toggleRow.querySelector('.toggle-label').textContent = label;
+        toggleRow.querySelector('.toggle-caption').textContent = caption;
+    }
+
+    // Recompute a group's toggle from the state of its individual skill toggles
+    function syncGroupToggleFromSkills(groupItem) {
+        var skillToggles = groupItem.querySelectorAll('.skill-enable-toggle');
+        var groupToggleRow = groupItem.querySelector('.group-status .toggle-row');
+        if (!skillToggles.length || !groupToggleRow) {
+            return;
+        }
+        var enabledCount = 0;
+        skillToggles.forEach(function (toggle) {
+            if (toggle.checked) {
+                enabledCount++;
+            }
+        });
+        var state = enabledCount === skillToggles.length ? 'enabled' : (enabledCount === 0 ? 'disabled' : 'mixed');
+        setToggleRowState(groupToggleRow, state);
+        groupItem.dataset.status = state === 'mixed' ? 'disabled' : state;
+    }
+
+    document.addEventListener('change', function (event) {
+        if (event.target.classList.contains('skill-enable-toggle')) {
+            var groupItem = event.target.closest('.group-item');
+            if (groupItem) {
+                syncGroupToggleFromSkills(groupItem);
+            }
+            return;
+        }
+
         if (!event.target.classList.contains('enable-toggle')) {
             return;
         }
+
         var toggleRow = event.target.closest('.toggle-row');
         var on = event.target.checked;
-        toggleRow.classList.toggle('on', on);
-        toggleRow.querySelector('.toggle-label').textContent = on ? 'Enabled' : 'Disabled';
-        toggleRow.querySelector('.toggle-caption').textContent = on ? 'Available to Claude' : 'Not available to Claude';
-        toggleRow.closest('.group-item').dataset.status = on ? 'enabled' : 'disabled';
+        setToggleRowState(toggleRow, on ? 'enabled' : 'disabled');
+
+        var groupItem = event.target.closest('.group-item');
+        if (groupItem) {
+            groupItem.dataset.status = on ? 'enabled' : 'disabled';
+            groupItem.querySelectorAll('.skill-enable-toggle').forEach(function (toggle) {
+                toggle.checked = on;
+            });
+        }
     });
 
     // Expand/collapse a group's skill list
