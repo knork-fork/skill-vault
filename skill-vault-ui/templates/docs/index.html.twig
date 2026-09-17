@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_avatar.html.twig' as avatar %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}Documentation · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .article-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .article-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 20px;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .article-card:hover {
+        border-color: var(--accent);
+        background: var(--surface-raised);
+    }
+
+    .article-card .title {
+        font-weight: 700;
+        color: var(--text);
+        font-size: 1rem;
+    }
+
+    .article-card .chevron {
+        margin-left: auto;
+        width: 16px;
+        height: 16px;
+        color: var(--text-faint);
+        flex-shrink: 0;
+    }
+
+    .empty-state {
+        padding: 30px 10px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('docs') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Documentation</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>Documentation</h1>
+                        <p>Guides and reference articles for using the Skill Vault.</p>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <label class="search-input">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="articleSearch" placeholder="Search documentation...">
+                    </label>
+                </div>
+            </div>
+
+            <div class="article-grid" id="articleGrid">
+                {% for article in articles %}
+                    <a class="article-card" data-name="{{ article.title|lower }}" href="{{ path('app_docs_show', {slug: article.slug}) }}">
+                        {{ avatar.render('book', 'blue', 'sm') }}
+                        <span class="title">{{ article.title }}</span>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="empty-state" id="articleEmptyState" style="display:none;">No articles match your search.</div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var grid = document.getElementById('articleGrid');
+    var searchInput = document.getElementById('articleSearch');
+    var emptyState = document.getElementById('articleEmptyState');
+
+    function applyFilters() {
+        var query = searchInput.value.trim().toLowerCase();
+        var visibleCount = 0;
+
+        Array.prototype.forEach.call(grid.children, function (card) {
+            var visible = !query || card.dataset.name.indexOf(query) !== -1;
+            card.style.display = visible ? '' : 'none';
+            if (visible) {
+                visibleCount++;
+            }
+        });
+
+        emptyState.style.display = visibleCount === 0 ? '' : 'none';
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+})();
+</script>
+{% endblock %}

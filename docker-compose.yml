@@ -19,6 +19,7 @@ services:
         working_dir: /application
         volumes:
             - './skill-vault-ui:/application'
+            - './docs:/application/docs:ro'
             - './skill-vault-ui/phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
         ports:
             - '20100:80'
@@ -32,6 +33,7 @@ services:
             - db
         volumes:
             - './skill-vault-ui:/application'
+            - './docs:/application/docs:ro'
             - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/fpm/conf.d/99-overrides.ini'
             - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/cli/conf.d/99-overrides.ini'
 
