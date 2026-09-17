@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+docker exec -e PGPASSWORD=skill_vault -e HOME=/tmp -it skill-vault-mcp-db psql --no-psqlrc -X -h skill-vault-mcp-db -p 5432 -U skill_vault skill_vault "$@"
