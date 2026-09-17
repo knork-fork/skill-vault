@@ -32,4 +32,7 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/signup, roles: PUBLIC_ACCESS }
+        - { path: ^/\.well-known/, roles: PUBLIC_ACCESS }
+        - { path: ^/oauth/(register|token|introspect), roles: PUBLIC_ACCESS }
+        - { path: ^/oauth/authorize, roles: ROLE_USER }
         - { path: ^/$, roles: ROLE_USER }

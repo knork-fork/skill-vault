@@ -1,5 +1,8 @@
 parameters:
     app.resources_dir: '%env(RESOURCES_DIR)%'
+    app.skill_vault_ui_url: '%env(SKILL_VAULT_UI_URL)%'
+    app.skill_vault_ui_internal_url: '%env(SKILL_VAULT_UI_INTERNAL_URL)%'
+    app.oauth_introspection_shared_secret: '%env(OAUTH_INTROSPECTION_SHARED_SECRET)%'
 
 services:
     _defaults:

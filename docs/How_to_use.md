@@ -14,7 +14,7 @@ Replace `localhost:20101` with your Skill Vault deployment's actual host if it i
 
 Claude Code can talk to the Skill Vault MCP server directly from the CLI.
 
-1. Make sure the Skill Vault MCP server is running and reachable (for a local Docker setup, `docker compose up -d` from the repo root).
+1. Make sure the Skill Vault MCP server is running and reachable (for a local Docker setup, `docker compose up -d` from the repo root), and that `./scripts/setup.sh` has been run at least once — it generates the shared secret the two services use to validate each other's OAuth tokens. Without it, the sign-in step below will fail.
 2. From a terminal, register the server:
 
    ```

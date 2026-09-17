@@ -8,3 +8,7 @@ framework:
 
     router:
         utf8: true
+
+    http_client:
+        default_options:
+            timeout: 5

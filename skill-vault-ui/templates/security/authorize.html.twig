@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Authorize - Skill Vault{% endblock %}
+
+{% block body %}
+    <div class="auth-shell">
+        <div class="card">
+            <h1>{{ client.clientName }} wants access</h1>
+
+            <p class="footer-text">Signed in as <strong>{{ user.username }}</strong></p>
+
+            <form method="post">
+                <input type="hidden" name="client_id" value="{{ client_id }}">
+                <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                <input type="hidden" name="state" value="{{ state }}">
+                <input type="hidden" name="code_challenge" value="{{ code_challenge }}">
+                <input type="hidden" name="code_challenge_method" value="{{ code_challenge_method }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('oauth_authorize') }}">
+
+                <button type="submit" name="decision" value="allow" class="btn-primary">Allow</button>
+                <button type="submit" name="decision" value="deny" class="btn btn-secondary">Deny</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -17,3 +17,46 @@ CREATE TABLE skill_groups (
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
+
+-- OAuth 2.0 authorization server tables (skill-vault-ui issues and owns these;
+-- skill-vault-mcp-server never queries them directly, only via the introspection
+-- endpoint). Public clients only (PKCE required, no client secret).
+CREATE TABLE oauth_clients (
+    client_id VARCHAR(64) PRIMARY KEY,
+    client_name VARCHAR(255) NOT NULL,
+    redirect_uris TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE oauth_auth_codes (
+    id BIGSERIAL PRIMARY KEY,
+    code_hash VARCHAR(64) NOT NULL UNIQUE,
+    client_id VARCHAR(64) NOT NULL REFERENCES oauth_clients(client_id),
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    redirect_uri TEXT NOT NULL,
+    code_challenge VARCHAR(128) NOT NULL,
+    code_challenge_method VARCHAR(10) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE oauth_access_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    client_id VARCHAR(64) NOT NULL REFERENCES oauth_clients(client_id),
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE oauth_refresh_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    client_id VARCHAR(64) NOT NULL REFERENCES oauth_clients(client_id),
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);

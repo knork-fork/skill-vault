@@ -1,5 +1,6 @@
 parameters:
     app.resources_dir: '%env(RESOURCES_DIR)%'
+    app.oauth_introspection_shared_secret: '%env(OAUTH_INTROSPECTION_SHARED_SECRET)%'
 
 services:
     _defaults:

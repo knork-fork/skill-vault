@@ -23,5 +23,8 @@ parameters:
           paths:
               - src/Entity/User.php
               - src/Entity/SkillGroup.php
+              - src/Entity/OAuthAuthCode.php
+              - src/Entity/OAuthAccessToken.php
+              - src/Entity/OAuthRefreshToken.php
         - identifier: return.type
           path: src/Entity/User.php
