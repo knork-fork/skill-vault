@@ -1,4 +1,5 @@
 parameters:
+    app.resources_dir: '%env(RESOURCES_DIR)%'
 
 services:
     _defaults:
