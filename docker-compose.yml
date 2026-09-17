@@ -1,4 +1,17 @@
 services:
+    db:
+        container_name: skill-vault-mcp-db
+        restart: unless-stopped
+        image: 'postgres:16-alpine'
+        environment:
+            POSTGRES_USER: skill_vault
+            POSTGRES_PASSWORD: skill_vault
+            POSTGRES_DB: skill_vault
+        volumes:
+            - 'skill-vault-db-data:/var/lib/postgresql/data'
+        ports:
+            - '20102:5432'
+
     webserver-ui:
         container_name: skill-vault-ui-webserver
         restart: unless-stopped
@@ -15,6 +28,8 @@ services:
         restart: unless-stopped
         build: skill-vault-ui/phpdocker/php-fpm
         working_dir: /application
+        depends_on:
+            - db
         volumes:
             - './skill-vault-ui:/application'
             - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/fpm/conf.d/99-overrides.ini'
@@ -36,7 +51,12 @@ services:
         restart: unless-stopped
         build: skill-vault-mcp-server/phpdocker/php-fpm
         working_dir: /application
+        depends_on:
+            - db
         volumes:
             - './skill-vault-mcp-server:/application'
             - './skill-vault-mcp-server/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/fpm/conf.d/99-overrides.ini'
             - './skill-vault-mcp-server/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/cli/conf.d/99-overrides.ini'
+
+volumes:
+    skill-vault-db-data:
