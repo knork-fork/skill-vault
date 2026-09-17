@@ -1,0 +1,1 @@
+Web UI for managing skills, skill groups, and user access

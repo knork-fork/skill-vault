@@ -1,0 +1,1 @@
+Serves and handles MCP requests, lists tools and skills, manages user auth, executes skills and tools

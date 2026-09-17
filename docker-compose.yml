@@ -1,0 +1,42 @@
+services:
+    webserver-ui:
+        container_name: skill-vault-ui-webserver
+        restart: unless-stopped
+        image: 'nginx:alpine'
+        working_dir: /application
+        volumes:
+            - './skill-vault-ui:/application'
+            - './skill-vault-ui/phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+        ports:
+            - '20100:80'
+
+    php-fpm-ui:
+        container_name: skill-vault-ui-php-fpm
+        restart: unless-stopped
+        build: skill-vault-ui/phpdocker/php-fpm
+        working_dir: /application
+        volumes:
+            - './skill-vault-ui:/application'
+            - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/fpm/conf.d/99-overrides.ini'
+            - './skill-vault-ui/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/cli/conf.d/99-overrides.ini'
+
+    webserver-mcp:
+        container_name: skill-vault-mcp-server-webserver
+        restart: unless-stopped
+        image: 'nginx:alpine'
+        working_dir: /application
+        volumes:
+            - './skill-vault-mcp-server:/application'
+            - './skill-vault-mcp-server/phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+        ports:
+            - '20101:80'
+
+    php-fpm-mcp:
+        container_name: skill-vault-mcp-server-php-fpm
+        restart: unless-stopped
+        build: skill-vault-mcp-server/phpdocker/php-fpm
+        working_dir: /application
+        volumes:
+            - './skill-vault-mcp-server:/application'
+            - './skill-vault-mcp-server/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/fpm/conf.d/99-overrides.ini'
+            - './skill-vault-mcp-server/phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.5/cli/conf.d/99-overrides.ini'

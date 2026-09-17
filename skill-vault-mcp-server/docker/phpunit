@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+docker exec -t skill-vault-mcp-server-php-fpm bin/phpunit $@
