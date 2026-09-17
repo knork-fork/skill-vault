@@ -18,6 +18,13 @@ set_env_var() {
     fi
 }
 
+docker compose -f "$REPO_ROOT/docker-compose.yml" exec -T -u www-data php-fpm-ui sh -c '
+    mkdir -p /resources/skills
+    if [ ! -d /resources/skills/.git ]; then
+        git init /resources/skills
+    fi
+'
+
 SHARED_SECRET="$(openssl rand -hex 32)"
 
 set_env_var "$REPO_ROOT/skill-vault-ui/.env.local" "OAUTH_INTROSPECTION_SHARED_SECRET" "$SHARED_SECRET"
