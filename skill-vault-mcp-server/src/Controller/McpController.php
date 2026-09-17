@@ -16,8 +16,8 @@ use Symfony\Component\Routing\Attribute\Route;
  * Streamable HTTP MCP transport (single JSON response per request, no SSE,
  * no session id) per docs/Skills_vs_Tools.md. Every request must carry a
  * bearer token issued by skill-vault-ui's OAuth server; the resolved identity
- * is attached to the request but not yet used to filter skills/tools — every
- * authenticated caller still sees every skill/tool under resources/.
+ * is passed to McpRequestHandler so skill listing/execution is scoped to
+ * that user's enabled skills.
  */
 final class McpController
 {
@@ -47,7 +47,7 @@ final class McpController
         }
 
         /** @var array<string, mixed> $payload */
-        $response = $this->handler->handle($payload);
+        $response = $this->handler->handle($payload, $identity);
         if ($response === null) {
             return new Response('', 202);
         }

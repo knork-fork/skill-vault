@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mcp;
 
+use App\Security\TokenIdentity;
 use stdClass;
 
 /**
@@ -16,14 +17,16 @@ use stdClass;
  * skill by name returns its instructions; calling a tool by name is meant to
  * run its backend logic.
  *
- * No auth: every skill/tool under resources/ is currently exposed to every caller.
+ * Skills are scoped to the authenticated caller's enabled set (see
+ * EnabledSkillsRepository). Tools have no per-user enablement concept yet, so
+ * every tool under resources/ is still exposed to every authenticated caller.
  */
 final class McpRequestHandler
 {
     private const PROTOCOL_VERSION = '2025-06-18';
 
     public function __construct(
-        private readonly SkillFileRepository $skills,
+        private readonly EnabledSkillsRepository $skills,
         private readonly ToolFileRepository $tools,
     ) {
     }
@@ -33,7 +36,7 @@ final class McpRequestHandler
      *
      * @return array<string, mixed>|null
      */
-    public function handle(array $request): ?array
+    public function handle(array $request, TokenIdentity $identity): ?array
     {
         $id = $request['id'] ?? null;
         $isNotification = !\array_key_exists('id', $request);
@@ -49,8 +52,8 @@ final class McpRequestHandler
             $result = match ($method) {
                 'initialize' => $this->initialize(),
                 'ping' => new stdClass(),
-                'tools/list' => $this->listTools(),
-                'tools/call' => $this->callTool($params),
+                'tools/list' => $this->listTools($identity),
+                'tools/call' => $this->callTool($params, $identity),
                 default => throw new McpMethodNotFoundException($method),
             };
         } catch (McpMethodNotFoundException $e) {
@@ -86,7 +89,7 @@ final class McpRequestHandler
     /**
      * @return array<string, mixed>
      */
-    private function listTools(): array
+    private function listTools(TokenIdentity $identity): array
     {
         $skillTools = array_map(
             static fn (array $skill): array => [
@@ -94,7 +97,7 @@ final class McpRequestHandler
                 'description' => $skill['description'],
                 'inputSchema' => ['type' => 'object', 'properties' => (object) []],
             ],
-            $this->skills->findAll(),
+            $this->skills->findAllForUser($identity->userId),
         );
 
         $tools = array_map(
@@ -114,11 +117,11 @@ final class McpRequestHandler
      *
      * @return array<string, mixed>
      */
-    private function callTool(array $params): array
+    private function callTool(array $params, TokenIdentity $identity): array
     {
         $name = \is_string($params['name'] ?? null) ? $params['name'] : '';
 
-        $skill = $this->skills->findByName($name);
+        $skill = $this->skills->findByNameForUser($name, $identity->userId);
         if ($skill !== null) {
             return [
                 'content' => [
