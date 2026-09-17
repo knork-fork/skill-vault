@@ -23,6 +23,7 @@ Claude Code can talk to the Skill Vault MCP server directly from the CLI.
 
    - `skill-vault` is the name Claude Code will use to refer to this server; you can pick any name.
    - `--transport http` tells Claude Code to talk to the server over HTTP rather than launching a local process.
+   - use `-s user` instead of the default `-s local` to make it available in all your projects, not just this folder.
 3. If the server requires you to sign in, Claude Code will prompt you to authenticate the first time it connects. Approve the request in the browser window that opens.
 4. Verify the connection:
 
@@ -34,8 +35,6 @@ Claude Code can talk to the Skill Vault MCP server directly from the CLI.
 5. Start (or restart) a Claude Code session. Your enabled skills and tools are now available — Claude will pick them up automatically based on what you ask, without needing to name them directly.
 
 To remove the server later, run `claude mcp remove skill-vault`.
-
-By default the server is registered for your local user. If you want a team member to share the same registration inside a specific project, add `--scope project` so the configuration is written to that project instead of your personal settings.
 
 ## Adding a connector in Claude.ai (web)
 
