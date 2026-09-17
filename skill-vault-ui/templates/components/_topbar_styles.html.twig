@@ -1,0 +1,124 @@
+{# Shared CSS for the components/_topbar.html.twig macro. Include once per page. #}
+<style>
+    .topbar {
+        height: 76px;
+        flex-shrink: 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        gap: 24px;
+    }
+
+    .search-box {
+        flex: 1;
+        max-width: 800px;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 18px;
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .search-box svg {
+        width: 21px;
+        height: 21px;
+        flex-shrink: 0;
+    }
+
+    .search-box span.kbd {
+        margin-left: auto;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        background: var(--surface);
+        border: 1px solid var(--border-strong);
+        border-radius: 6px;
+        padding: 2px 7px;
+    }
+
+    .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-shrink: 0;
+    }
+
+    .icon-btn {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        color: var(--text-soft);
+        text-decoration: none;
+    }
+
+    .icon-btn:hover {
+        background: var(--surface-raised);
+    }
+
+    .icon-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .icon-btn .dot {
+        position: absolute;
+        top: 8px;
+        right: 9px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--danger);
+        border: 2px solid var(--surface);
+    }
+
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: var(--text);
+        padding: 5px 10px 5px 5px;
+        border-radius: 26px;
+    }
+
+    .user-menu:hover {
+        background: var(--surface-raised);
+    }
+
+    .user-menu .avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: linear-gradient(140deg, var(--accent) 0%, var(--accent-deep) 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.98rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        flex-shrink: 0;
+    }
+
+    .user-menu span.name {
+        font-size: 1.06rem;
+        font-weight: 700;
+    }
+
+    .user-menu svg {
+        width: 18px;
+        height: 18px;
+        color: var(--text-muted);
+    }
+</style>

@@ -1,0 +1,99 @@
+{# Shared CSS for the app shell (sidebar + main column). Include once per page. #}
+<style>
+    .app-shell {
+        display: flex;
+        min-height: 100vh;
+        align-items: stretch;
+    }
+
+    .sidebar {
+        width: 292px;
+        flex-shrink: 0;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        padding: 22px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 4px 8px;
+        font-size: 1.42rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+
+    .brand .icon-badge {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        background: linear-gradient(140deg, var(--accent) 0%, var(--accent-deep) 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(43, 82, 224, 0.22);
+    }
+
+    .brand .icon-badge svg {
+        width: 25px;
+        height: 25px;
+    }
+
+    .nav-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 13px 15px;
+        border-radius: 10px;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 1.03rem;
+        font-weight: 600;
+    }
+
+    .nav-item svg {
+        width: 23px;
+        height: 23px;
+        flex-shrink: 0;
+        color: var(--text-muted);
+    }
+
+    .nav-item:hover {
+        background: var(--surface-raised);
+        color: var(--text);
+    }
+
+    .nav-item:hover svg {
+        color: var(--text-soft);
+    }
+
+    .nav-item.active {
+        background: #e7ecfe;
+        color: var(--accent-deep);
+        font-weight: 700;
+    }
+
+    .nav-item.active svg {
+        color: var(--accent-deep);
+    }
+
+    .main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+</style>

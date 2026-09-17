@@ -1,0 +1,1059 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_avatar.html.twig' as avatar %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}Skill Groups · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .page-hero {
+        margin: 0 -40px;
+        padding: 22px 40px 4px;
+        background: radial-gradient(900px 260px at 15% 0%, rgba(43, 82, 224, 0.09), transparent 65%), var(--bg);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .breadcrumb {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .breadcrumb a {
+        color: var(--text-muted);
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        color: var(--text);
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+    }
+
+    .page-header h1 {
+        margin: 4px 0 6px;
+        font-size: 2.1rem;
+        letter-spacing: -0.03em;
+        font-weight: 800;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: var(--text-muted);
+        max-width: 640px;
+        line-height: 1.5;
+    }
+
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        width: auto;
+        padding: 12px 18px;
+    }
+
+    .btn-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .search-input {
+        flex: 1;
+        max-width: 420px;
+        height: 42px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0 14px;
+    }
+
+    .search-input svg {
+        width: 18px;
+        height: 18px;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+
+    .search-input input {
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 0.92rem;
+        color: var(--text);
+        width: 100%;
+        height: 100%;
+    }
+
+    .filter-select {
+        appearance: none;
+        height: 42px;
+        box-sizing: border-box;
+        background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6784' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;
+        background-size: 16px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0 32px 0 14px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        cursor: pointer;
+    }
+
+    .layout-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .panel-pad {
+        padding: 20px 22px;
+    }
+
+    .panel-heading {
+        margin: 0 0 3px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    .panel-subtext {
+        margin: 0 0 18px;
+        font-size: 0.88rem;
+        color: var(--text-muted);
+    }
+
+    .group-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 4px;
+        border-top: 1px solid var(--border);
+    }
+
+    .group-list > .group-row:first-child {
+        border-top: none;
+    }
+
+    .group-info {
+        flex: 1.4;
+        min-width: 0;
+    }
+
+    .group-name {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .group-desc {
+        margin-top: 2px;
+        font-size: 0.86rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    .group-skill-count {
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.82rem;
+        color: var(--text-faint);
+    }
+
+    .group-skill-count svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .group-access {
+        flex: 0 0 150px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.85rem;
+    }
+
+    .access-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+    }
+
+    .access-badge svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .access-badge.public { color: #1d4ed8; }
+    .access-badge.private { color: var(--text-soft); }
+    .access-badge.workspace { color: #6d28d9; }
+
+    .access-scope {
+        color: var(--text-faint);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .access-scope svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    .group-status {
+        flex: 0 0 150px;
+    }
+
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toggle {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 22px;
+        flex-shrink: 0;
+    }
+
+    .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-track {
+        position: absolute;
+        inset: 0;
+        background: #d4dbe7;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .toggle-track::before {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        top: 3px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform 0.15s ease;
+        box-shadow: 0 1px 2px rgba(15, 27, 51, 0.3);
+    }
+
+    .toggle input:checked + .toggle-track {
+        background: #16a34a;
+    }
+
+    .toggle input:checked + .toggle-track::before {
+        transform: translateX(18px);
+    }
+
+    .toggle-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-faint);
+        line-height: 1.3;
+    }
+
+    .toggle-row.on .toggle-label {
+        color: #15803d;
+    }
+
+    .toggle-caption {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-faint);
+    }
+
+    .row-menu {
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .row-menu-btn {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        color: var(--text-faint);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .row-menu-btn:hover {
+        background: var(--surface-raised);
+        color: var(--text-soft);
+    }
+
+    .row-menu-btn svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .row-menu-panel {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 34px;
+        z-index: 5;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(20, 30, 60, 0.14);
+        min-width: 150px;
+        padding: 6px;
+    }
+
+    .row-menu.open .row-menu-panel {
+        display: block;
+    }
+
+    .row-menu-panel button {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 7px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        cursor: pointer;
+    }
+
+    .row-menu-panel button:hover {
+        background: var(--surface-raised);
+        color: var(--text);
+    }
+
+    .row-menu-panel button.danger {
+        color: var(--danger);
+    }
+
+    .empty-state {
+        padding: 30px 10px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Ungrouped skills side panel */
+    .ungrouped-panel .panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .count-pill {
+        background: var(--surface-raised);
+        color: var(--text-soft);
+        font-size: 0.82rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 2px 10px;
+    }
+
+    .skill-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-top: 1px solid var(--border);
+    }
+
+    .skill-list > .skill-row:first-child {
+        border-top: none;
+    }
+
+    .skill-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: var(--surface-raised);
+        color: var(--text-soft);
+    }
+
+    .skill-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .skill-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .skill-name {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .skill-desc {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        line-height: 1.35;
+        margin-top: 1px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 27, 51, 0.45);
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 50;
+    }
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+    .modal-card {
+        width: 100%;
+        max-width: 480px;
+        max-height: 88vh;
+        overflow-y: auto;
+        background: var(--surface);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 27, 51, 0.3);
+        padding: 26px 26px 22px;
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .modal-header h2 {
+        margin: 0 0 4px;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .modal-header p {
+        margin: 0;
+        font-size: 0.86rem;
+        color: var(--text-muted);
+    }
+
+    .modal-close {
+        width: auto;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .modal-close:hover {
+        background: var(--surface-raised);
+        color: var(--text);
+    }
+
+    .modal-close svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .modal-preview {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .modal-preview-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 68px;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .picker-label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+
+    .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .icon-option {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 10px;
+        border: 2px solid var(--border);
+        background: var(--surface-raised);
+        color: var(--text-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .icon-option svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .icon-option:hover {
+        border-color: var(--border-strong);
+    }
+
+    .icon-option.selected {
+        border-color: var(--accent);
+        background: #e7ecfe;
+        color: var(--accent-deep);
+    }
+
+    .color-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .color-option {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        padding: 0;
+        box-shadow: inset 0 0 0 1px rgba(15, 27, 51, 0.08);
+    }
+
+    .color-option.selected {
+        border-color: var(--text);
+        box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px;
+    }
+
+    .modal-actions .btn {
+        width: auto;
+        flex: 1;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('skill_groups') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Skill Groups</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>Skill Groups</h1>
+                        <p>Organize your skills into groups, control access, and choose which groups and skills are available to you and Claude via MCP.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-icon" id="openCreateGroup">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Create Group
+                    </button>
+                </div>
+
+                <div class="toolbar">
+                    <label class="search-input">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="groupSearch" placeholder="Search skill groups...">
+                    </label>
+
+                    <select class="filter-select" id="accessFilter">
+                        <option value="all">All Access</option>
+                        <option value="public">Public</option>
+                        <option value="workspace">Workspace</option>
+                        <option value="private">Private</option>
+                    </select>
+
+                    <select class="filter-select" id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="enabled">Enabled</option>
+                        <option value="disabled">Disabled</option>
+                    </select>
+
+                    <select class="filter-select" id="sortSelect">
+                        <option value="name">Sort by: Name</option>
+                        <option value="skills">Sort by: Skill count</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layout-grid">
+                <div class="panel panel-pad">
+                    <h2 class="panel-heading"><span id="groupCountLabel">{{ groups|length }}</span> Skill Groups</h2>
+                    <p class="panel-subtext">Manage your groups, enable or disable them, and control who can access them.</p>
+
+                    <div class="group-list" id="groupList">
+                        {% for group in groups %}
+                            <div class="group-row"
+                                 data-name="{{ group.name|lower }}"
+                                 data-access="{{ group.access.type }}"
+                                 data-status="{{ group.enabled ? 'enabled' : 'disabled' }}"
+                                 data-skills="{{ group.skillCount }}">
+                                {{ avatar.render(group.icon, group.color, 'md') }}
+
+                                <div class="group-info">
+                                    <div class="group-name">{{ group.name }}</div>
+                                    <div class="group-desc">{{ group.description }}</div>
+                                    <div class="group-skill-count">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                                        {{ group.skillCount }} skill{{ group.skillCount == 1 ? '' : 's' }}
+                                    </div>
+                                </div>
+
+                                <div class="group-access">
+                                    <span class="access-badge {{ group.access.type }}">
+                                        {% if group.access.type == 'public' %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                        {% elseif group.access.type == 'workspace' %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        {% else %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                        {% endif %}
+                                        {{ group.access.label }}
+                                    </span>
+                                    <span class="access-scope">{{ group.access.scope }}</span>
+                                </div>
+
+                                <div class="group-status">
+                                    <label class="toggle-row {{ group.enabled ? 'on' : '' }}">
+                                        <span class="toggle">
+                                            <input type="checkbox" {{ group.enabled ? 'checked' : '' }} class="enable-toggle">
+                                            <span class="toggle-track"></span>
+                                        </span>
+                                        <span>
+                                            <span class="toggle-label">{{ group.enabled ? 'Enabled' : 'Disabled' }}</span>
+                                            <span class="toggle-caption">{{ group.enabled ? 'Available to Claude' : 'Not available to Claude' }}</span>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="row-menu">
+                                    <button type="button" class="row-menu-btn" aria-label="More options">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                    </button>
+                                    <div class="row-menu-panel">
+                                        <button type="button" data-action="rename">Rename</button>
+                                        <button type="button" data-action="move">Manage skills</button>
+                                        <button type="button" class="danger" data-action="delete">Delete group</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="empty-state" id="groupEmptyState" style="display:none;">No skill groups match your filters.</div>
+                </div>
+
+                <div class="panel panel-pad ungrouped-panel">
+                    <h2 class="panel-heading">Ungrouped Skills <span class="count-pill">{{ ungroupedSkills|length }}</span></h2>
+                    <p class="panel-subtext">These skills aren't in a group yet. You can enable them individually or move them to a group.</p>
+
+                    <div class="skill-list">
+                        {% for skill in ungroupedSkills %}
+                            <div class="skill-row">
+                                <span class="skill-icon">{{ avatar.icon(skill.icon) }}</span>
+                                <div class="skill-body">
+                                    <div class="skill-name">{{ skill.name }}</div>
+                                    <div class="skill-desc">{{ skill.description }}</div>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" {{ skill.enabled ? 'checked' : '' }}>
+                                    <span class="toggle-track"></span>
+                                </label>
+                                <div class="row-menu">
+                                    <button type="button" class="row-menu-btn" aria-label="More options">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                    </button>
+                                    <div class="row-menu-panel">
+                                        <button type="button" data-action="move">Move to group</button>
+                                        <button type="button" class="danger" data-action="delete">Delete skill</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div class="modal-overlay" id="createGroupModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <h2>Create Group</h2>
+                <p>Give your group a name, description, and an avatar.</p>
+            </div>
+            <button type="button" class="modal-close" id="closeCreateGroup" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <form id="createGroupForm">
+            <div class="modal-preview">
+                {{ avatar.render(iconOptions[0].key, colorOptions[0].key, 'lg') }}
+                <span class="modal-preview-text">Preview</span>
+            </div>
+
+            <div class="field">
+                <label for="groupName">Name</label>
+                <input type="text" id="groupName" placeholder="e.g. Marketing" required>
+            </div>
+
+            <div class="field">
+                <label for="groupDescription">Description</label>
+                <textarea id="groupDescription" placeholder="What is this group for?"></textarea>
+            </div>
+
+            <div class="field">
+                <span class="picker-label">Icon</span>
+                <div class="icon-grid" id="iconGrid">
+                    {% for opt in iconOptions %}
+                        <button type="button" class="icon-option {{ loop.first ? 'selected' : '' }}" data-icon="{{ opt.key }}" title="{{ opt.label }}" aria-label="{{ opt.label }}">
+                            {{ avatar.icon(opt.key) }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="field">
+                <span class="picker-label">Color</span>
+                <div class="color-grid" id="colorGrid">
+                    {% for opt in colorOptions %}
+                        <button type="button" class="color-option {{ loop.first ? 'selected' : '' }}" data-color="{{ opt.key }}" style="background:{{ opt.hex }};" title="{{ opt.key }}" aria-label="{{ opt.key }}"></button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelCreateGroup">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Group</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var modal = document.getElementById('createGroupModal');
+    var openBtn = document.getElementById('openCreateGroup');
+    var closeBtn = document.getElementById('closeCreateGroup');
+    var cancelBtn = document.getElementById('cancelCreateGroup');
+    var form = document.getElementById('createGroupForm');
+    var iconGrid = document.getElementById('iconGrid');
+    var colorGrid = document.getElementById('colorGrid');
+    var preview = modal.querySelector('.modal-preview .group-avatar');
+    var groupList = document.getElementById('groupList');
+    var groupCountLabel = document.getElementById('groupCountLabel');
+
+    var selectedIcon = iconGrid.querySelector('.icon-option.selected').dataset.icon;
+    var selectedColor = colorGrid.querySelector('.color-option.selected').dataset.color;
+
+    function openModal() {
+        modal.classList.add('open');
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        form.reset();
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    function updatePreview() {
+        preview.className = 'group-avatar avatar-color-' + selectedColor + ' avatar-size-lg';
+    }
+
+    iconGrid.addEventListener('click', function (event) {
+        var btn = event.target.closest('.icon-option');
+        if (!btn) {
+            return;
+        }
+        iconGrid.querySelectorAll('.icon-option').forEach(function (el) {
+            el.classList.remove('selected');
+        });
+        btn.classList.add('selected');
+        selectedIcon = btn.dataset.icon;
+
+        var svg = btn.querySelector('svg').cloneNode(true);
+        preview.innerHTML = '';
+        preview.appendChild(svg);
+    });
+
+    colorGrid.addEventListener('click', function (event) {
+        var btn = event.target.closest('.color-option');
+        if (!btn) {
+            return;
+        }
+        colorGrid.querySelectorAll('.color-option').forEach(function (el) {
+            el.classList.remove('selected');
+        });
+        btn.classList.add('selected');
+        selectedColor = btn.dataset.color;
+        updatePreview();
+    });
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        var name = document.getElementById('groupName').value.trim();
+        var description = document.getElementById('groupDescription').value.trim();
+        if (!name) {
+            return;
+        }
+
+        var iconSvg = iconGrid.querySelector('.icon-option.selected svg').cloneNode(true);
+
+        var row = document.createElement('div');
+        row.className = 'group-row';
+        row.dataset.name = name.toLowerCase();
+        row.dataset.access = 'private';
+        row.dataset.status = 'enabled';
+        row.dataset.skills = '0';
+
+        var avatarSpan = document.createElement('span');
+        avatarSpan.className = 'group-avatar avatar-color-' + selectedColor + ' avatar-size-md';
+        avatarSpan.appendChild(iconSvg);
+
+        row.innerHTML =
+            '<div class="group-info">' +
+                '<div class="group-name"></div>' +
+                '<div class="group-desc"></div>' +
+                '<div class="group-skill-count">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' +
+                    '0 skills' +
+                '</div>' +
+            '</div>' +
+            '<div class="group-access">' +
+                '<span class="access-badge private">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+                    'Private' +
+                '</span>' +
+                '<span class="access-scope">Only me (Writable)</span>' +
+            '</div>' +
+            '<div class="group-status">' +
+                '<label class="toggle-row on">' +
+                    '<span class="toggle">' +
+                        '<input type="checkbox" checked class="enable-toggle">' +
+                        '<span class="toggle-track"></span>' +
+                    '</span>' +
+                    '<span>' +
+                        '<span class="toggle-label">Enabled</span>' +
+                        '<span class="toggle-caption">Available to Claude</span>' +
+                    '</span>' +
+                '</label>' +
+            '</div>' +
+            '<div class="row-menu">' +
+                '<button type="button" class="row-menu-btn" aria-label="More options">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>' +
+                '</button>' +
+                '<div class="row-menu-panel">' +
+                    '<button type="button" data-action="rename">Rename</button>' +
+                    '<button type="button" data-action="move">Manage skills</button>' +
+                    '<button type="button" class="danger" data-action="delete">Delete group</button>' +
+                '</div>' +
+            '</div>';
+
+        row.querySelector('.group-name').textContent = name;
+        row.querySelector('.group-desc').textContent = description;
+        row.insertBefore(avatarSpan, row.firstChild);
+
+        groupList.insertBefore(row, groupList.firstChild);
+        groupCountLabel.textContent = groupList.children.length;
+
+        closeModal();
+    });
+
+    // Row kebab menus (event delegation covers rows added after page load)
+    document.addEventListener('click', function (event) {
+        var menuBtn = event.target.closest('.row-menu-btn');
+        document.querySelectorAll('.row-menu.open').forEach(function (menu) {
+            if (!menuBtn || menu !== menuBtn.closest('.row-menu')) {
+                menu.classList.remove('open');
+            }
+        });
+        if (menuBtn) {
+            menuBtn.closest('.row-menu').classList.toggle('open');
+            return;
+        }
+        if (event.target.closest('.row-menu-panel button[data-action="delete"]')) {
+            var row = event.target.closest('.group-row, .skill-row');
+            if (row) {
+                row.remove();
+                groupCountLabel.textContent = groupList.children.length;
+            }
+        }
+    });
+
+    // Enabled/disabled toggle labels
+    groupList.addEventListener('change', function (event) {
+        if (!event.target.classList.contains('enable-toggle')) {
+            return;
+        }
+        var toggleRow = event.target.closest('.toggle-row');
+        var on = event.target.checked;
+        toggleRow.classList.toggle('on', on);
+        toggleRow.querySelector('.toggle-label').textContent = on ? 'Enabled' : 'Disabled';
+        toggleRow.querySelector('.toggle-caption').textContent = on ? 'Available to Claude' : 'Not available to Claude';
+        toggleRow.closest('.group-row').dataset.status = on ? 'enabled' : 'disabled';
+    });
+
+    // Search + filters
+    var searchInput = document.getElementById('groupSearch');
+    var accessFilter = document.getElementById('accessFilter');
+    var statusFilter = document.getElementById('statusFilter');
+    var sortSelect = document.getElementById('sortSelect');
+    var emptyState = document.getElementById('groupEmptyState');
+
+    function applyFilters() {
+        var query = searchInput.value.trim().toLowerCase();
+        var access = accessFilter.value;
+        var status = statusFilter.value;
+        var visibleCount = 0;
+
+        Array.prototype.forEach.call(groupList.children, function (row) {
+            var matchesQuery = !query || row.dataset.name.indexOf(query) !== -1;
+            var matchesAccess = access === 'all' || row.dataset.access === access;
+            var matchesStatus = status === 'all' || row.dataset.status === status;
+            var visible = matchesQuery && matchesAccess && matchesStatus;
+            row.style.display = visible ? '' : 'none';
+            if (visible) {
+                visibleCount++;
+            }
+        });
+
+        emptyState.style.display = visibleCount === 0 ? '' : 'none';
+    }
+
+    function applySort() {
+        var rows = Array.prototype.slice.call(groupList.children);
+        rows.sort(function (a, b) {
+            if (sortSelect.value === 'skills') {
+                return parseInt(b.dataset.skills, 10) - parseInt(a.dataset.skills, 10);
+            }
+            return a.dataset.name.localeCompare(b.dataset.name);
+        });
+        rows.forEach(function (row) {
+            groupList.appendChild(row);
+        });
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    accessFilter.addEventListener('change', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    sortSelect.addEventListener('change', applySort);
+})();
+</script>
+{% endblock %}
