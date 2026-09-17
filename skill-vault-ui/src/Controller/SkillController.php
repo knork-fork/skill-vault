@@ -8,8 +8,10 @@ use App\Avatar\AvatarPalette;
 use App\Entity\SkillGroup;
 use App\Entity\User;
 use App\Repository\SkillGroupRepository;
+use App\Skill\SkillAccessService;
 use App\Skill\SkillFileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +23,7 @@ final class SkillController extends AbstractController
     public function __construct(
         private readonly SkillFileRepository $skills,
         private readonly SkillGroupRepository $skillGroups,
+        private readonly SkillAccessService $skillAccess,
     ) {
     }
 
@@ -38,9 +41,22 @@ final class SkillController extends AbstractController
     #[Route(path: '/skills', name: 'app_skills', methods: ['GET'])]
     public function index(#[CurrentUser] User $user): Response
     {
+        $context = $this->skillAccess->contextForUser($user);
+        $skills = array_map(
+            static function (array $skill) use ($context): array {
+                $skill['enabled'] = $context->isSkillEnabled(
+                    \is_string($skill['slug']) ? $skill['slug'] : '',
+                    \is_string($skill['group'] ?? null) ? $skill['group'] : null,
+                );
+
+                return $skill;
+            },
+            $this->skills->findAll(),
+        );
+
         return $this->render('skills/index.html.twig', [
             'user' => $user,
-            'skills' => $this->skills->findAll(),
+            'skills' => $skills,
             'groupNames' => $this->groupNames(),
         ]);
     }
@@ -151,6 +167,36 @@ final class SkillController extends AbstractController
         ]);
 
         return $this->redirectToRoute('app_skill', ['slug' => $slug]);
+    }
+
+    #[Route(path: '/skills/{slug}/state', name: 'app_skill_set_state', methods: ['POST'])]
+    public function setState(#[CurrentUser] User $user, Request $request, string $slug): JsonResponse
+    {
+        if (!$this->isCsrfTokenValid('set_skill_state', $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $skill = $this->skills->findBySlug($slug);
+        if ($skill === null) {
+            throw $this->createNotFoundException('Skill not found.');
+        }
+
+        $groupName = \is_string($skill['group'] ?? null) ? $skill['group'] : null;
+        $group = $groupName !== null ? $this->skillGroups->findOneByName($groupName) : null;
+
+        $siblingSlugs = $groupName !== null
+            ? array_values(array_map(
+                static fn (array $s): string => \is_string($s['slug']) ? $s['slug'] : '',
+                array_filter(
+                    $this->skills->findAll(),
+                    static fn (array $s): bool => $s['group'] === $groupName,
+                ),
+            ))
+            : [];
+
+        $this->skillAccess->setSkillEnabled($user, $slug, $request->request->getBoolean('enabled'), $group, $siblingSlugs);
+
+        return new JsonResponse(['slug' => $slug, 'enabled' => $request->request->getBoolean('enabled')]);
     }
 
     #[Route(path: '/skills/{slug}/delete', name: 'app_skill_delete', methods: ['POST'])]

@@ -8,9 +8,11 @@ use App\Avatar\AvatarPalette;
 use App\Entity\SkillGroup;
 use App\Entity\User;
 use App\Repository\SkillGroupRepository;
+use App\Skill\SkillAccessService;
 use App\Skill\SkillFileRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +24,7 @@ final class SkillGroupController extends AbstractController
     public function __construct(
         private readonly SkillGroupRepository $skillGroups,
         private readonly SkillFileRepository $skills,
+        private readonly SkillAccessService $skillAccess,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -30,13 +33,30 @@ final class SkillGroupController extends AbstractController
     public function index(#[CurrentUser] User $user): Response
     {
         $skills = $this->skills->findAll();
+        $context = $this->skillAccess->contextForUser($user);
 
         $groups = array_map(
-            static function (SkillGroup $group) use ($skills): array {
+            static function (SkillGroup $group) use ($skills, $context): array {
                 $groupSkills = array_values(array_filter(
                     $skills,
                     static fn (array $skill): bool => $skill['group'] === $group->getName(),
                 ));
+                $groupSkills = array_map(
+                    static function (array $skill) use ($context, $group): array {
+                        $skill['enabled'] = $context->isSkillEnabled(
+                            \is_string($skill['slug']) ? $skill['slug'] : '',
+                            $group->getName(),
+                        );
+
+                        return $skill;
+                    },
+                    $groupSkills,
+                );
+                $groupSlugs = array_map(
+                    static fn (array $skill): string => \is_string($skill['slug']) ? $skill['slug'] : '',
+                    $groupSkills,
+                );
+                $state = $context->groupState($group, $groupSlugs);
 
                 return [
                     'name' => $group->getName(),
@@ -45,10 +65,11 @@ final class SkillGroupController extends AbstractController
                     'color' => $group->getColor(),
                     'skillCount' => \count($groupSkills),
                     'skills' => $groupSkills,
-                    // Access control and per-group enablement aren't implemented yet — every
-                    // group is displayed as public/editable/enabled for now.
+                    // Access control isn't implemented yet — every group is displayed as
+                    // public/editable for now.
                     'access' => ['type' => 'public', 'label' => 'Public', 'scope' => 'All users (Writable)'],
-                    'enabled' => true,
+                    'state' => $state,
+                    'enabled' => $state === 'enabled',
                 ];
             },
             $this->skillGroups->findAll(),
@@ -58,6 +79,14 @@ final class SkillGroupController extends AbstractController
             $skills,
             static fn (array $skill): bool => $skill['group'] === null,
         ));
+        $ungroupedSkills = array_map(
+            static function (array $skill) use ($context): array {
+                $skill['enabled'] = $context->isSkillEnabled(\is_string($skill['slug']) ? $skill['slug'] : '', null);
+
+                return $skill;
+            },
+            $ungroupedSkills,
+        );
 
         return $this->render('skill_groups/index.html.twig', [
             'user' => $user,
@@ -66,6 +95,32 @@ final class SkillGroupController extends AbstractController
             'iconOptions' => AvatarPalette::ICONS,
             'colorOptions' => AvatarPalette::COLORS,
         ]);
+    }
+
+    #[Route(path: '/skill-groups/{name}/state', name: 'app_skill_group_set_state', methods: ['POST'])]
+    public function setState(#[CurrentUser] User $user, Request $request, string $name): JsonResponse
+    {
+        if (!$this->isCsrfTokenValid('set_skill_group_state', $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $group = $this->skillGroups->findOneByName($name);
+        if ($group === null) {
+            throw $this->createNotFoundException('Skill group not found.');
+        }
+
+        $slugsInGroup = array_values(array_map(
+            static fn (array $skill): string => \is_string($skill['slug']) ? $skill['slug'] : '',
+            array_filter(
+                $this->skills->findAll(),
+                static fn (array $skill): bool => $skill['group'] === $name,
+            ),
+        ));
+
+        $enabled = $request->request->getBoolean('enabled');
+        $this->skillAccess->setSkillGroupEnabled($user, $group, $enabled, $slugsInGroup);
+
+        return new JsonResponse(['name' => $name, 'enabled' => $enabled]);
     }
 
     #[Route(path: '/skill-groups', name: 'app_skill_groups_create', methods: ['POST'])]

@@ -26,5 +26,7 @@ parameters:
               - src/Entity/OAuthAuthCode.php
               - src/Entity/OAuthAccessToken.php
               - src/Entity/OAuthRefreshToken.php
+              - src/Entity/UserSkillState.php
+              - src/Entity/UserSkillGroupState.php
         - identifier: return.type
           path: src/Entity/User.php

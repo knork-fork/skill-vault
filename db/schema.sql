@@ -18,6 +18,26 @@ CREATE TABLE skill_groups (
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
+-- Per-user enable/disable opt-ins. Skills have no table of their own (they're files under
+-- resources/skills/<slug>, see skill-vault-ui/CLAUDE.md), so they're keyed by slug here; skill
+-- groups are keyed by their skill_groups.id. See skill-vault-ui's SkillAccessService for how an
+-- entry (or its absence) here is resolved into an effective enabled/disabled/mixed state.
+CREATE TABLE user_skill_states (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    skill_slug VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL,
+    UNIQUE (user_id, skill_slug)
+);
+
+CREATE TABLE user_skill_group_states (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    skill_group_id BIGINT NOT NULL REFERENCES skill_groups(id) ON DELETE CASCADE,
+    enabled BOOLEAN NOT NULL,
+    UNIQUE (user_id, skill_group_id)
+);
+
 -- OAuth 2.0 authorization server tables (skill-vault-ui issues and owns these;
 -- skill-vault-mcp-server never queries them directly, only via the introspection
 -- endpoint). Public clients only (PKCE required, no client secret).

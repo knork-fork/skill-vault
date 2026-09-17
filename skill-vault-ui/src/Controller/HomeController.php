@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\SkillGroup;
 use App\Entity\User;
 use App\Repository\SkillGroupRepository;
+use App\Skill\SkillAccessService;
 use App\Skill\SkillFileRepository;
 use App\Support\QuoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +20,7 @@ final class HomeController extends AbstractController
     public function __construct(
         private readonly SkillFileRepository $skills,
         private readonly SkillGroupRepository $skillGroups,
+        private readonly SkillAccessService $skillAccess,
         private readonly QuoteRepository $quotes,
     ) {
     }
@@ -28,6 +30,18 @@ final class HomeController extends AbstractController
     {
         $skills = $this->skills->findAll();
         $groups = $this->skillGroups->findAll();
+
+        $context = $this->skillAccess->contextForUser($user);
+        $enabledSkillsCount = 0;
+        foreach ($skills as $skill) {
+            $enabled = $context->isSkillEnabled(
+                \is_string($skill['slug']) ? $skill['slug'] : '',
+                \is_string($skill['group'] ?? null) ? $skill['group'] : null,
+            );
+            if ($enabled) {
+                ++$enabledSkillsCount;
+            }
+        }
 
         $topGroups = array_map(
             static function (SkillGroup $group) use ($skills): array {
@@ -51,6 +65,7 @@ final class HomeController extends AbstractController
         return $this->render('home/index.html.twig', [
             'user' => $user,
             'totalSkills' => \count($skills),
+            'enabledSkillsCount' => $enabledSkillsCount,
             'totalGroups' => \count($groups),
             'topGroups' => $topGroups,
             'quote' => $this->quotes->random(),
