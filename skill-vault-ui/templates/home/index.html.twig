@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Skill Vault{% endblock %}
+
+{% block body %}
+    <h1>Welcome, {{ user.firstName }}</h1>
+    <p class="footer-text">You're logged in as {{ user.username }}.</p>
+    <a href="{{ path('app_logout') }}" class="btn btn-secondary">Log out</a>
+{% endblock %}

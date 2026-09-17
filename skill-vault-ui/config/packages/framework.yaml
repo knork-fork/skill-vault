@@ -8,3 +8,15 @@ framework:
 
     router:
         utf8: true
+
+    session:
+        enabled: true
+        cookie_secure: auto
+        cookie_samesite: lax
+
+    form: true
+    csrf_protection: true
+
+    validation:
+        enabled: true
+        email_validation_mode: html5

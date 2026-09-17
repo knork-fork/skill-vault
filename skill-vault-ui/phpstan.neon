@@ -13,3 +13,11 @@ parameters:
               - tests/Unit/ExampleTest.php
               - tests/Integration/ExampleTest.php
               - tests/Functional/ExampleTest.php
+        # Doctrine sets these via reflection (id) or via the form's data_class binding
+        # (username/password/firstName/lastName) rather than through the constructor.
+        - identifier: property.uninitialized
+          path: src/Entity/User.php
+        - identifier: property.unusedType
+          path: src/Entity/User.php
+        - identifier: return.type
+          path: src/Entity/User.php
