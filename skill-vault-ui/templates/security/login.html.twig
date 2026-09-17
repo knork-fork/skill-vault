@@ -3,38 +3,42 @@
 {% block title %}Log in - Skill Vault{% endblock %}
 
 {% block body %}
-    <h1>Log in to Skill Vault</h1>
+    <div class="auth-shell">
+        <div class="card">
+            <h1>Log in to Skill Vault</h1>
 
-    {% if error %}
-        <div class="alert">Invalid username or password.</div>
-    {% endif %}
+            {% if error %}
+                <div class="alert">Invalid username or password.</div>
+            {% endif %}
 
-    <form method="post">
-        <div class="field">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
+            <form method="post">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="_password" autocomplete="current-password" required>
+                </div>
+
+                <div class="checkbox-row">
+                    <input type="checkbox" id="remember_me" name="_remember_me">
+                    <label for="remember_me">Remember me</label>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button type="submit" class="btn-primary">Log in</button>
+            </form>
+
+            <div class="divider"><span>or</span></div>
+
+            <button type="button" class="btn-google" disabled title="Coming soon">
+                Continue with Google
+            </button>
+
+            <a href="{{ path('app_signup') }}" class="btn btn-secondary">Sign up</a>
         </div>
-
-        <div class="field">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="_password" autocomplete="current-password" required>
-        </div>
-
-        <div class="checkbox-row">
-            <input type="checkbox" id="remember_me" name="_remember_me">
-            <label for="remember_me">Remember me</label>
-        </div>
-
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-        <button type="submit" class="btn-primary">Log in</button>
-    </form>
-
-    <div class="divider"><span>or</span></div>
-
-    <button type="button" class="btn-google" disabled title="Coming soon">
-        Continue with Google
-    </button>
-
-    <a href="{{ path('app_signup') }}" class="btn btn-secondary">Sign up</a>
+    </div>
 {% endblock %}
