@@ -114,13 +114,19 @@ final class SkillFileRepository
             }
 
             $contentFile = $dir . '/skill.md';
+            $metadataFile = $dir . '/metadata.yaml';
             $previousContent = is_file($contentFile) ? file_get_contents($contentFile) : null;
+            $previousMetadata = is_file($metadataFile) ? file_get_contents($metadataFile) : null;
 
-            file_put_contents($dir . '/metadata.yaml', Yaml::dump($metadata));
+            $newMetadata = Yaml::dump($metadata);
+            file_put_contents($metadataFile, $newMetadata);
             file_put_contents($contentFile, $data['content']);
 
-            if ($previousContent === false || $previousContent !== $data['content']) {
-                $this->commitSkillContent($slug, $authorName, $authorEmail);
+            $contentChanged = $previousContent === false || $previousContent !== $data['content'];
+            $metadataChanged = $previousMetadata === false || $previousMetadata !== $newMetadata;
+
+            if ($contentChanged || $metadataChanged) {
+                $this->commitSkillFiles($slug, ['metadata.yaml', 'skill.md'], \sprintf('Update %s', $slug), $authorName, $authorEmail);
             }
         } finally {
             flock($lock, \LOCK_UN);
@@ -129,19 +135,21 @@ final class SkillFileRepository
     }
 
     /**
-     * Commits the current `skill.md` for a skill to the internal git repo at
+     * Commits the given `<slug>/...`-relative paths to the internal git repo at
      * `{resourcesDir}/skills/.git`, one commit per edit (read back by
      * `SkillHistoryRepository`). A missing repo is a no-op: recording history is opt-in,
      * not a requirement for saving a skill.
+     *
+     * @param list<string> $relativePaths paths relative to `<slug>/`
      */
-    private function commitSkillContent(string $slug, string $authorName, ?string $authorEmail): void
+    private function commitSkillFiles(string $slug, array $relativePaths, string $message, string $authorName, ?string $authorEmail): void
     {
         $repoDir = $this->resourcesDir . '/skills';
         if (!is_dir($repoDir . '/.git')) {
             return;
         }
 
-        $relativePath = $slug . '/skill.md';
+        $pathspecs = array_map(static fn (string $path): string => $slug . '/' . $path, $relativePaths);
         $env = [
             'GIT_AUTHOR_NAME' => $authorName,
             'GIT_AUTHOR_EMAIL' => $authorEmail ?? 'no-reply@skill-vault.local',
@@ -149,21 +157,21 @@ final class SkillFileRepository
             'GIT_COMMITTER_EMAIL' => $authorEmail ?? 'no-reply@skill-vault.local',
         ];
 
-        $add = new Process(['git', '-C', $repoDir, '-c', 'safe.directory=' . $repoDir, 'add', '--', $relativePath]);
+        $add = new Process(['git', '-C', $repoDir, '-c', 'safe.directory=' . $repoDir, 'add', '-A', '--', ...$pathspecs]);
         $add->run();
         if (!$add->isSuccessful()) {
             return;
         }
 
         $commit = new Process(
-            ['git', '-C', $repoDir, '-c', 'safe.directory=' . $repoDir, 'commit', '--only', '-m', \sprintf('Update %s', $relativePath), '--', $relativePath],
+            ['git', '-C', $repoDir, '-c', 'safe.directory=' . $repoDir, 'commit', '--only', '-m', $message, '--', ...$pathspecs],
             null,
             $env,
         );
         $commit->run();
     }
 
-    public function delete(string $slug): void
+    public function delete(string $slug, string $authorName, ?string $authorEmail = null): void
     {
         $dir = $this->resourcesDir . '/skills/' . $slug;
         if (!is_dir($dir)) {
@@ -182,6 +190,8 @@ final class SkillFileRepository
         }
 
         rmdir($dir);
+
+        $this->commitSkillFiles($slug, ['metadata.yaml', 'skill.md'], \sprintf('Delete %s', $slug), $authorName, $authorEmail);
     }
 
     /**

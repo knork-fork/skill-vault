@@ -222,13 +222,13 @@ final class SkillController extends AbstractController
     }
 
     #[Route(path: '/skills/{slug}/delete', name: 'app_skill_delete', methods: ['POST'])]
-    public function delete(Request $request, string $slug): RedirectResponse
+    public function delete(#[CurrentUser] User $user, Request $request, string $slug): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('delete_skill', $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
-        $this->skills->delete($slug);
+        $this->skills->delete($slug, trim($user->getFirstName() . ' ' . $user->getLastName()), $user->getEmail());
 
         $redirect = $request->request->getString('redirect');
 

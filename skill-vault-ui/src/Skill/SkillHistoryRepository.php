@@ -11,8 +11,9 @@ use Symfony\Component\Process\Process;
 
 /**
  * Reads per-skill edit history from the internal git repo at `{resourcesDir}/skills/.git`,
- * where each commit corresponds to one saved edit of a skill's `skill.md`. Recording those
- * commits is out of scope here - this only reads what's already there.
+ * where each commit corresponds to one saved edit of a skill's `metadata.yaml` and/or
+ * `skill.md`. Recording those commits is out of scope here - this only reads what's
+ * already there.
  */
 final class SkillHistoryRepository
 {
@@ -35,15 +36,18 @@ final class SkillHistoryRepository
         // The resources bind mount can be owned by a different uid than the git process
         // (see phpdocker/php-fpm/Entrypoint.sh) - scope the "safe.directory" exception to
         // this one invocation instead of trusting it globally.
+        // A directory pathspec (not individual file paths) so the log is the union of
+        // commits touching either `metadata.yaml` or `skill.md` under the slug, as one
+        // timeline. `--follow` isn't used here: it requires exactly one pathspec and only
+        // tracks renames of that single file, neither of which applies to a directory.
         $process = new Process([
             'git',
             '-C', $repoDir,
             '-c', 'safe.directory=' . $repoDir,
             'log',
-            '--follow',
             '--format=%H%x1f%an%x1f%aI',
             '--',
-            $slug . '/skill.md',
+            $slug,
         ]);
         $process->run();
 
