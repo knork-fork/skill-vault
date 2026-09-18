@@ -75,10 +75,10 @@ final class EnabledSkillsRepository
     /**
      * @return array{slug: string, name: string, description: string, requires: list<string>, content: string}|null
      */
-    public function findByNameForUser(string $name, int $userId): ?array
+    public function findBySlugForUser(string $slug, int $userId): ?array
     {
         foreach ($this->findAllForUser($userId) as $skill) {
-            if ($skill['name'] === $name) {
+            if ($skill['slug'] === $slug) {
                 return $skill;
             }
         }

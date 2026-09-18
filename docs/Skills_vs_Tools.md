@@ -60,7 +60,12 @@ Claude request. Exposing a skill as a tool instead means the model can select an
 way it would call any other tool.
 
 So `tools/list` returns both `compile_trello_notes` (the skill) and `trello_get_card` (the tool) as tools.
-A skill's `inputSchema` takes no arguments — calling it just returns its instructions:
+A skill's `inputSchema` takes no arguments — calling it just returns its instructions.
+
+The wire-level `name` is always the resource's directory slug, never its `metadata.yaml`/`tool.yaml`
+`name:` field verbatim — MCP tool names must be bare identifiers, and some clients (e.g. Claude.ai) silently
+drop any tool whose name doesn't match that, unlike Claude Code. The human-readable `name:` value (which may
+contain spaces) is surfaced separately as `title`:
 
 ```
 {
@@ -70,11 +75,13 @@ A skill's `inputSchema` takes no arguments — calling it just returns its instr
     "tools": [
       {
         "name": "compile_trello_notes",
+        "title": "compile_trello_notes",
         "description": "Compile a Trello card into current decisions, relevant history and unresolved questions.",
         "inputSchema": { "type": "object", "properties": {} }
       },
       {
         "name": "trello_get_card",
+        "title": "trello_get_card",
         "description": "Fetch a Trello card and its relevant data using the current user's Trello account.",
         "inputSchema": {
           "type": "object",

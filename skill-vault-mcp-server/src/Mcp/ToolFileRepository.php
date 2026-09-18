@@ -45,10 +45,10 @@ final class ToolFileRepository
     /**
      * @return array{slug: string, name: string, description: string, inputSchema: array<string, mixed>}|null
      */
-    public function findByName(string $name): ?array
+    public function findBySlug(string $slug): ?array
     {
         foreach ($this->findAll() as $tool) {
-            if ($tool['name'] === $name) {
+            if ($tool['slug'] === $slug) {
                 return $tool;
             }
         }

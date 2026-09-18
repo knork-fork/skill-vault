@@ -91,9 +91,14 @@ final class McpRequestHandler
      */
     private function listTools(TokenIdentity $identity): array
     {
+        // MCP tool `name` must be a bare identifier (Claude.ai enforces this strictly and
+        // silently drops any tool whose name fails; Claude Code is more lenient), so the
+        // wire name is the filesystem slug, with the human-readable skill/tool name kept
+        // as `title` (protocol 2025-06-18 added `title` on Tool for exactly this split).
         $skillTools = array_map(
             static fn (array $skill): array => [
-                'name' => $skill['name'],
+                'name' => $skill['slug'],
+                'title' => $skill['name'],
                 'description' => $skill['description'],
                 'inputSchema' => ['type' => 'object', 'properties' => (object) []],
             ],
@@ -102,7 +107,8 @@ final class McpRequestHandler
 
         $tools = array_map(
             static fn (array $tool): array => [
-                'name' => $tool['name'],
+                'name' => $tool['slug'],
+                'title' => $tool['name'],
                 'description' => $tool['description'],
                 'inputSchema' => $tool['inputSchema'],
             ],
@@ -121,7 +127,7 @@ final class McpRequestHandler
     {
         $name = \is_string($params['name'] ?? null) ? $params['name'] : '';
 
-        $skill = $this->skills->findByNameForUser($name, $identity->userId);
+        $skill = $this->skills->findBySlugForUser($name, $identity->userId);
         if ($skill !== null) {
             return [
                 'content' => [
@@ -130,7 +136,7 @@ final class McpRequestHandler
             ];
         }
 
-        $tool = $this->tools->findByName($name);
+        $tool = $this->tools->findBySlug($name);
         if ($tool !== null) {
             // Tools are currently only listed, not executed: no backend service is
             // wired up yet to fulfil a tools/call request.
