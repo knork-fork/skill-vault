@@ -9,6 +9,7 @@ docker-compose up -d --build
 skill-vault-ui/docker/composer install
 skill-vault-mcp-server/docker/composer install
 ./scripts/setup.sh
+./db/init-db.sh
 ```
 
 For more information, see [How to Setup](docs/How_to_Setup.md).

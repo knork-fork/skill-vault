@@ -9,9 +9,12 @@ docker-compose up -d --build
 skill-vault-ui/docker/composer install
 skill-vault-mcp-server/docker/composer install
 ./scripts/setup.sh
+./db/init-db.sh
 ```
 
 `scripts/setup.sh` generates the shared secret that `skill-vault-ui` and `skill-vault-mcp-server` use to validate each other's OAuth tokens. It's safe to re-run.
+
+`db/init-db.sh` drops and recreates the whole database, so only run it deliberately (e.g. on first setup, or to reset local data).
 
 ## Invite-only signup
 
