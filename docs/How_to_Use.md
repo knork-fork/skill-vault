@@ -39,19 +39,25 @@ Claude Code can talk to the Skill Vault MCP server directly from the CLI.
 
 To remove the server later, run `claude mcp remove skill-vault`.
 
-## Adding a connector in Claude.ai (web) - **WIP, not yet released**
+## Adding a connector in Claude.ai (web)
 
-Claude.ai lets you add the same MCP server as a custom connector so it's available in your web conversations.
+This is a two-step process: your organization owner adds the connector once, then each user connects their own account to it.
+
+**Organization owner, one-time setup:**
 
 1. Go to **Settings → Connectors** in Claude.ai.
 2. Click **Add custom connector**.
 3. Enter:
    - **Name**: `Skill Vault` (or any label you'll recognize)
-   - **URL**: `{{SKILL_VAULT_MCP_URL}}/mcp` (use your deployment's public URL — Claude.ai must be able to reach it over the network, so a `localhost` address only works if the server is exposed publicly or through a tunnel)
-4. Click **Add**, then follow any sign-in prompt to authorize your account. This is what lets Skill Vault know who you are, so it only exposes the skills and tools you personally have access to and have enabled.
-5. Once connected, enable the connector in a conversation from the tools/connectors menu. Claude will then be able to use your Skill Vault skills and tools in that chat.
+   - **URL**: `{{SKILL_VAULT_MCP_URL}}/mcp` (deployment's public URL — Claude.ai must be able to reach it over the network)
+4. Click **Add**.
 
-Claude.ai only supports one company-level connector at a time, so coordinate with your admin if a Skill Vault connector is already set up for your organization.
+**Each user:**
+
+1. Go to [claude.ai/customize/connectors/directory](https://claude.ai/customize/connectors/directory).
+2. Under **Custom connectors**, click **Connect Skill Vault to Claude**.
+3. You'll be redirected to Skill Vault's allow page — sign in and approve the request. This is what lets Skill Vault know who you are, so it only exposes the skills and tools you personally have access to and have enabled.
+4. Once connected, enable the connector in a conversation from the tools/connectors menu. Claude will then be able to use your Skill Vault skills and tools in that chat.
 
 ## Notes
 
