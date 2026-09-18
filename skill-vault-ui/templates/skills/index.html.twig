@@ -248,7 +248,6 @@
                                 Updated
                                 <svg class="sort-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                             </th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="skillTableBody">
@@ -269,20 +268,6 @@
                                     {% endif %}
                                 </td>
                                 <td class="col-updated">{{ skill.updated }}</td>
-                                <td class="row-menu" onclick="event.stopPropagation()">
-                                    <button type="button" class="row-menu-btn" aria-label="More options">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                                    </button>
-                                    <div class="row-menu-panel">
-                                        <button type="button" onclick="window.location='{{ path('app_skill', {slug: skill.slug}) }}'">Open</button>
-                                        <button type="button" onclick="window.location='{{ path('app_skill_edit', {slug: skill.slug}) }}'">Edit</button>
-                                        <form method="post" action="{{ path('app_skill_delete', {slug: skill.slug}) }}" onsubmit="return confirm('Delete this skill? This cannot be undone.');" style="display:contents;">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_skill') }}">
-                                            <input type="hidden" name="redirect" value="skills">
-                                            <button type="submit" class="danger">Delete</button>
-                                        </form>
-                                    </div>
-                                </td>
                             </tr>
                         {% else %}
                             <tr>
