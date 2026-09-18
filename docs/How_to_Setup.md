@@ -6,6 +6,8 @@ This covers deploying and configuring a Skill Vault instance. If you just want t
 
 ```
 docker-compose up -d --build
+skill-vault-ui/docker/composer install
+skill-vault-mcp-server/docker/composer install
 ./scripts/setup.sh
 ```
 

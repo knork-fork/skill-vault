@@ -6,6 +6,8 @@ A Skill Vault for creating, organizing, versioning and permissioning shared or p
 
 ```
 docker-compose up -d --build
+skill-vault-ui/docker/composer install
+skill-vault-mcp-server/docker/composer install
 ./scripts/setup.sh
 ```
 
