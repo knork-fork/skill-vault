@@ -498,6 +498,172 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+
+    /* History modals (diff / compare / view file) */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 27, 51, 0.45);
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 50;
+    }
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+    .modal-card {
+        width: 100%;
+        max-width: 480px;
+        max-height: 88vh;
+        overflow-y: auto;
+        background: var(--surface);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 27, 51, 0.3);
+        padding: 26px 26px 22px;
+    }
+
+    .modal-card-wide {
+        max-width: 920px;
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .modal-header h2 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .modal-header p {
+        margin: 0;
+        font-size: 0.86rem;
+        color: var(--text-muted);
+    }
+
+    .modal-close {
+        width: auto;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .modal-close:hover {
+        background: var(--surface-raised);
+        color: var(--text);
+    }
+
+    .modal-close svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .modal-loading {
+        padding: 30px 0;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.88rem;
+    }
+
+    .file-block {
+        margin-bottom: 18px;
+    }
+
+    .file-block:last-child {
+        margin-bottom: 0;
+    }
+
+    .file-block-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        margin-bottom: 8px;
+    }
+
+    .file-block-pre {
+        margin: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.82rem;
+        line-height: 1.6;
+        color: var(--text);
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+    }
+
+    .diff-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow-x: auto;
+        padding: 6px 0;
+    }
+
+    .diff-line {
+        padding: 1px 16px;
+        white-space: pre;
+    }
+
+    .diff-line.add {
+        background: rgba(26, 127, 75, 0.12);
+        color: #1a7f4b;
+    }
+
+    .diff-line.remove {
+        background: rgba(220, 38, 38, 0.1);
+        color: #b91c1c;
+    }
+
+    .diff-line.meta {
+        color: var(--text-faint);
+    }
+
+    .diff-line.context {
+        color: var(--text-soft);
+    }
+
+    .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .compare-col-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-soft);
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    @media (max-width: 720px) {
+        .compare-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -650,6 +816,60 @@
         </main>
     </div>
 </div>
+
+<div class="modal-overlay" id="diffModal">
+    <div class="modal-card modal-card-wide">
+        <div class="modal-header">
+            <div>
+                <h2 data-diff-version></h2>
+                <p data-diff-meta></p>
+            </div>
+            <button type="button" class="modal-close" data-modal-close="diffModal" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div data-diff-body></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="compareModal">
+    <div class="modal-card modal-card-wide">
+        <div class="modal-header">
+            <div>
+                <h2 data-compare-version></h2>
+                <p>Target version on the left, current version on the right.</p>
+            </div>
+            <button type="button" class="modal-close" data-modal-close="compareModal" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="compare-grid">
+            <div>
+                <div class="compare-col-title" data-compare-target-label></div>
+                <div data-compare-target-body></div>
+            </div>
+            <div>
+                <div class="compare-col-title">Current version</div>
+                <div data-compare-current-body></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="viewFileModal">
+    <div class="modal-card modal-card-wide">
+        <div class="modal-header">
+            <div>
+                <h2 data-view-file-version></h2>
+                <p data-view-file-meta></p>
+            </div>
+            <button type="button" class="modal-close" data-modal-close="viewFileModal" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div data-view-file-body></div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
@@ -783,14 +1003,18 @@
         viewDiff.type = 'button';
         viewDiff.className = 'btn-outline history-action';
         viewDiff.textContent = 'View diff';
-        viewDiff.disabled = true;
+        viewDiff.addEventListener('click', function () {
+            openDiffModal(version);
+        });
         actions.appendChild(viewDiff);
 
         var compare = document.createElement('button');
         compare.type = 'button';
         compare.className = 'btn-outline history-action';
         compare.textContent = 'Compare';
-        compare.disabled = true;
+        compare.addEventListener('click', function () {
+            openCompareModal(version);
+        });
         actions.appendChild(compare);
 
         var viewFile = document.createElement('button');
@@ -799,13 +1023,205 @@
         viewFile.setAttribute('aria-label', 'View file at this version');
         viewFile.title = 'View file at this version';
         viewFile.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-        viewFile.disabled = true;
+        viewFile.addEventListener('click', function () {
+            openViewFileModal(version);
+        });
         actions.appendChild(viewFile);
 
         card.appendChild(actions);
         row.appendChild(card);
 
         return row;
+    }
+
+    var historyUrl = '{{ path('app_skill_history', {slug: skill.slug}) }}';
+
+    function historyCommitUrl(commit, action) {
+        return historyUrl + '/' + encodeURIComponent(commit) + '/' + action;
+    }
+
+    var MODAL_IDS = ['diffModal', 'compareModal', 'viewFileModal'];
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    MODAL_IDS.forEach(function (id) {
+        var modal = document.getElementById(id);
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal(id);
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-modal-close]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            closeModal(btn.dataset.modalClose);
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            MODAL_IDS.forEach(closeModal);
+        }
+    });
+
+    function diffLineClass(line) {
+        if (line.indexOf('+++') === 0 || line.indexOf('---') === 0 || line.indexOf('diff ') === 0
+            || line.indexOf('index ') === 0 || line.indexOf('@@') === 0) {
+            return 'meta';
+        }
+        if (line.indexOf('+') === 0) {
+            return 'add';
+        }
+        if (line.indexOf('-') === 0) {
+            return 'remove';
+        }
+        return 'context';
+    }
+
+    function buildDiffCode(diffText) {
+        var code = document.createElement('div');
+        code.className = 'diff-code';
+
+        diffText.split('\n').forEach(function (line, index, lines) {
+            if (line === '' && index === lines.length - 1) {
+                return;
+            }
+            var lineEl = document.createElement('div');
+            lineEl.className = 'diff-line ' + diffLineClass(line);
+            lineEl.textContent = line === '' ? ' ' : line;
+            code.appendChild(lineEl);
+        });
+
+        return code;
+    }
+
+    function buildBlock(title, contentEl) {
+        var block = document.createElement('div');
+        block.className = 'file-block';
+
+        var heading = document.createElement('div');
+        heading.className = 'file-block-title';
+        heading.textContent = title;
+        block.appendChild(heading);
+        block.appendChild(contentEl);
+
+        return block;
+    }
+
+    function buildFileBlock(title, content) {
+        var pre = document.createElement('pre');
+        pre.className = 'file-block-pre';
+        pre.textContent = content;
+
+        return buildBlock(title, pre);
+    }
+
+    function buildLoading() {
+        var loading = document.createElement('p');
+        loading.className = 'modal-loading';
+        loading.textContent = 'Loading…';
+        return loading;
+    }
+
+    function buildError() {
+        var error = document.createElement('p');
+        error.className = 'modal-loading';
+        error.textContent = 'Could not load this version.';
+        return error;
+    }
+
+    function openDiffModal(version) {
+        var body = document.querySelector('[data-diff-body]');
+        document.querySelector('[data-diff-version]').textContent = 'Diff · Version ' + version.version;
+        document.querySelector('[data-diff-meta]').textContent = version.author + ' · ' + version.date;
+        body.textContent = '';
+        body.appendChild(buildLoading());
+        openModal('diffModal');
+
+        fetch(historyCommitUrl(version.commit, 'diff'), { headers: { 'Accept': 'application/json' } })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (diff) {
+                body.textContent = '';
+
+                var hasContent = false;
+                if (diff.metadataYaml) {
+                    hasContent = true;
+                    body.appendChild(buildBlock('metadata.yaml', buildDiffCode(diff.metadataYaml)));
+                }
+                if (diff.skillMd) {
+                    hasContent = true;
+                    body.appendChild(buildBlock('skill.md', buildDiffCode(diff.skillMd)));
+                }
+                if (!hasContent) {
+                    body.appendChild(buildError());
+                }
+            })
+            .catch(function () {
+                body.textContent = '';
+                body.appendChild(buildError());
+            });
+    }
+
+    function openCompareModal(version) {
+        var targetBody = document.querySelector('[data-compare-target-body]');
+        var currentBody = document.querySelector('[data-compare-current-body]');
+        document.querySelector('[data-compare-version]').textContent = 'Compare · Version ' + version.version;
+        document.querySelector('[data-compare-target-label]').textContent = 'Version ' + version.version;
+        targetBody.textContent = '';
+        currentBody.textContent = '';
+        targetBody.appendChild(buildLoading());
+        openModal('compareModal');
+
+        fetch(historyCommitUrl(version.commit, 'compare'), { headers: { 'Accept': 'application/json' } })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                targetBody.textContent = '';
+                currentBody.textContent = '';
+
+                targetBody.appendChild(buildFileBlock('metadata.yaml', data.target.metadataYaml || ''));
+                targetBody.appendChild(buildFileBlock('skill.md', data.target.skillMd || ''));
+
+                currentBody.appendChild(buildFileBlock('metadata.yaml', data.current.metadataYaml || ''));
+                currentBody.appendChild(buildFileBlock('skill.md', data.current.skillMd || ''));
+            })
+            .catch(function () {
+                targetBody.textContent = '';
+                targetBody.appendChild(buildError());
+            });
+    }
+
+    function openViewFileModal(version) {
+        var body = document.querySelector('[data-view-file-body]');
+        document.querySelector('[data-view-file-version]').textContent = 'File at Version ' + version.version;
+        document.querySelector('[data-view-file-meta]').textContent = version.author + ' · ' + version.date;
+        body.textContent = '';
+        body.appendChild(buildLoading());
+        openModal('viewFileModal');
+
+        fetch(historyCommitUrl(version.commit, 'file'), { headers: { 'Accept': 'application/json' } })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                body.textContent = '';
+                body.appendChild(buildFileBlock('metadata.yaml', data.metadataYaml || ''));
+                body.appendChild(buildFileBlock('skill.md', data.skillMd || ''));
+            })
+            .catch(function () {
+                body.textContent = '';
+                body.appendChild(buildError());
+            });
     }
 
     var menuBtn = document.getElementById('skillMenuBtn');

@@ -136,6 +136,39 @@ final class SkillController extends AbstractController
         return new JsonResponse($this->skillHistory->findHistory($slug));
     }
 
+    #[Route(path: '/skills/{slug}/history/{commit}/diff', name: 'app_skill_history_diff', methods: ['GET'])]
+    public function historyDiff(string $slug, string $commit): JsonResponse
+    {
+        if ($this->skills->findBySlug($slug) === null) {
+            throw $this->createNotFoundException('Skill not found.');
+        }
+
+        return new JsonResponse($this->skillHistory->findDiffForCommit($slug, $commit));
+    }
+
+    #[Route(path: '/skills/{slug}/history/{commit}/compare', name: 'app_skill_history_compare', methods: ['GET'])]
+    public function historyCompare(string $slug, string $commit): JsonResponse
+    {
+        if ($this->skills->findBySlug($slug) === null) {
+            throw $this->createNotFoundException('Skill not found.');
+        }
+
+        return new JsonResponse([
+            'target' => $this->skillHistory->findFileContentsAtCommit($slug, $commit),
+            'current' => $this->skillHistory->findFileContentsAtCommit($slug, 'HEAD'),
+        ]);
+    }
+
+    #[Route(path: '/skills/{slug}/history/{commit}/file', name: 'app_skill_history_file', methods: ['GET'])]
+    public function historyFile(string $slug, string $commit): JsonResponse
+    {
+        if ($this->skills->findBySlug($slug) === null) {
+            throw $this->createNotFoundException('Skill not found.');
+        }
+
+        return new JsonResponse($this->skillHistory->findFileContentsAtCommit($slug, $commit));
+    }
+
     #[Route(path: '/skills/{slug}/edit', name: 'app_skill_edit', methods: ['GET'])]
     public function edit(#[CurrentUser] User $user, string $slug): Response
     {

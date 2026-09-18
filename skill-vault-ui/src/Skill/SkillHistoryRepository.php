@@ -99,6 +99,85 @@ final class SkillHistoryRepository
         ];
     }
 
+    /**
+     * Content of `metadata.yaml` and `skill.md` as they stood at the given commit (which
+     * need not have touched either file - it's a tree snapshot, not a diff). `$commit` may
+     * also be `HEAD` to read the current committed state.
+     *
+     * @return array{metadataYaml: ?string, skillMd: ?string}
+     */
+    public function findFileContentsAtCommit(string $slug, string $commit): array
+    {
+        $repoDir = $this->resourcesDir . '/skills';
+        if (!is_dir($repoDir . '/.git')) {
+            return ['metadataYaml' => null, 'skillMd' => null];
+        }
+
+        return [
+            'metadataYaml' => $this->showFileAtCommit($repoDir, $slug, $commit, 'metadata.yaml'),
+            'skillMd' => $this->showFileAtCommit($repoDir, $slug, $commit, 'skill.md'),
+        ];
+    }
+
+    /**
+     * Unified diff for `metadata.yaml` and `skill.md` introduced by the given commit. A file
+     * the commit didn't touch comes back null, since a shared history entry can be exclusive
+     * to one of the two files.
+     *
+     * @return array{metadataYaml: ?string, skillMd: ?string}
+     */
+    public function findDiffForCommit(string $slug, string $commit): array
+    {
+        $repoDir = $this->resourcesDir . '/skills';
+        if (!is_dir($repoDir . '/.git')) {
+            return ['metadataYaml' => null, 'skillMd' => null];
+        }
+
+        return [
+            'metadataYaml' => $this->diffFileForCommit($repoDir, $slug, $commit, 'metadata.yaml'),
+            'skillMd' => $this->diffFileForCommit($repoDir, $slug, $commit, 'skill.md'),
+        ];
+    }
+
+    private function showFileAtCommit(string $repoDir, string $slug, string $commit, string $file): ?string
+    {
+        $process = new Process([
+            'git',
+            '-C', $repoDir,
+            '-c', 'safe.directory=' . $repoDir,
+            'show',
+            \sprintf('%s:%s/%s', $commit, $slug, $file),
+        ]);
+        $process->run();
+
+        return $process->isSuccessful() ? $process->getOutput() : null;
+    }
+
+    private function diffFileForCommit(string $repoDir, string $slug, string $commit, string $file): ?string
+    {
+        // --format= strips the commit header (hash/author/date/message), leaving just the
+        // unified diff for this one file - empty output when the commit didn't touch it.
+        $process = new Process([
+            'git',
+            '-C', $repoDir,
+            '-c', 'safe.directory=' . $repoDir,
+            'show',
+            '--format=',
+            $commit,
+            '--',
+            $slug . '/' . $file,
+        ]);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            return null;
+        }
+
+        $output = trim($process->getOutput());
+
+        return $output === '' ? null : $output;
+    }
+
     private static function initials(string $author): string
     {
         $words = array_values(array_filter(preg_split('/\s+/', trim($author)) ?: []));
