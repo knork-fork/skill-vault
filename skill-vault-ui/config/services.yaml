@@ -1,5 +1,6 @@
 parameters:
     app.resources_dir: '%env(RESOURCES_DIR)%'
+    app.skill_vault_mcp_url: '%env(SKILL_VAULT_MCP_URL)%'
     app.oauth_introspection_shared_secret: '%env(OAUTH_INTROSPECTION_SHARED_SECRET)%'
     app.invite_secret: '%env(INVITE_SECRET)%'
 

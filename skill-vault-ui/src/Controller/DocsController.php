@@ -17,6 +17,8 @@ final class DocsController extends AbstractController
     public function __construct(
         #[Autowire(param: 'kernel.project_dir')]
         private readonly string $projectDir,
+        #[Autowire(param: 'app.skill_vault_mcp_url')]
+        private readonly string $skillVaultMcpUrl,
     ) {
     }
 
@@ -73,6 +75,7 @@ final class DocsController extends AbstractController
         }
 
         $content = file_get_contents($path) ?: '';
+        $content = str_replace('{{SKILL_VAULT_MCP_URL}}', $this->skillVaultMcpUrl, $content);
         $converter = new CommonMarkConverter();
 
         return $this->render('docs/show.html.twig', [

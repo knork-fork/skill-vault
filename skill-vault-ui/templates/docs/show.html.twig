@@ -106,6 +106,7 @@
     }
 
     .markdown-body pre {
+        position: relative;
         background: var(--surface-raised);
         border: 1px solid var(--border);
         border-radius: 10px;
@@ -120,6 +121,40 @@
         padding: 0;
         font-size: 0.86rem;
         line-height: 1.6;
+    }
+
+    .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+    }
+
+    .markdown-body pre:hover .copy-btn {
+        opacity: 1;
+    }
+
+    .copy-btn:hover {
+        color: var(--text);
+        border-color: var(--accent);
+    }
+
+    .copy-btn svg {
+        width: 13px;
+        height: 13px;
     }
 
     .markdown-body blockquote {
@@ -188,4 +223,34 @@
         </main>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    var COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+    document.querySelectorAll('.markdown-body pre').forEach(function (pre) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'copy-btn';
+        button.innerHTML = COPY_ICON + '<span>Copy</span>';
+
+        button.addEventListener('click', function () {
+            var code = pre.querySelector('code');
+            var text = code ? code.textContent : pre.textContent;
+
+            navigator.clipboard.writeText(text || '').then(function () {
+                button.innerHTML = CHECK_ICON + '<span>Copied</span>';
+                setTimeout(function () {
+                    button.innerHTML = COPY_ICON + '<span>Copy</span>';
+                }, 1500);
+            });
+        });
+
+        pre.appendChild(button);
+    });
+})();
+</script>
 {% endblock %}
