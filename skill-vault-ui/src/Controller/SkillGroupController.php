@@ -148,7 +148,7 @@ final class SkillGroupController extends AbstractController
     }
 
     #[Route(path: '/skill-groups/{name}/delete', name: 'app_skill_groups_delete', methods: ['POST'])]
-    public function delete(Request $request, string $name): RedirectResponse
+    public function delete(#[CurrentUser] User $user, Request $request, string $name): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('delete_group', $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
@@ -166,14 +166,19 @@ final class SkillGroupController extends AbstractController
 
             $slug = \is_string($skill['slug']) ? $skill['slug'] : '';
 
-            $this->skills->save($slug, [
-                'name' => \is_string($skill['name']) ? $skill['name'] : $slug,
-                'description' => \is_string($skill['description']) ? $skill['description'] : '',
-                'group' => null,
-                'icon' => \is_string($skill['icon']) ? $skill['icon'] : 'folder',
-                'color' => \is_string($skill['color']) ? $skill['color'] : 'blue',
-                'content' => \is_string($skill['content']) ? $skill['content'] : '',
-            ]);
+            $this->skills->save(
+                $slug,
+                [
+                    'name' => \is_string($skill['name']) ? $skill['name'] : $slug,
+                    'description' => \is_string($skill['description']) ? $skill['description'] : '',
+                    'group' => null,
+                    'icon' => \is_string($skill['icon']) ? $skill['icon'] : 'folder',
+                    'color' => \is_string($skill['color']) ? $skill['color'] : 'blue',
+                    'content' => \is_string($skill['content']) ? $skill['content'] : '',
+                ],
+                trim($user->getFirstName() . ' ' . $user->getLastName()),
+                $user->getEmail(),
+            );
         }
 
         $this->entityManager->remove($group);
@@ -183,7 +188,7 @@ final class SkillGroupController extends AbstractController
     }
 
     #[Route(path: '/skill-groups/move-skill', name: 'app_skill_move_to_group', methods: ['POST'])]
-    public function moveSkill(Request $request): RedirectResponse
+    public function moveSkill(#[CurrentUser] User $user, Request $request): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('move_skill', $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
@@ -200,14 +205,19 @@ final class SkillGroupController extends AbstractController
             $group = '';
         }
 
-        $this->skills->save($slug, [
-            'name' => \is_string($skill['name']) ? $skill['name'] : $slug,
-            'description' => \is_string($skill['description']) ? $skill['description'] : '',
-            'group' => $group !== '' ? $group : null,
-            'icon' => \is_string($skill['icon']) ? $skill['icon'] : 'folder',
-            'color' => \is_string($skill['color']) ? $skill['color'] : 'blue',
-            'content' => \is_string($skill['content']) ? $skill['content'] : '',
-        ]);
+        $this->skills->save(
+            $slug,
+            [
+                'name' => \is_string($skill['name']) ? $skill['name'] : $slug,
+                'description' => \is_string($skill['description']) ? $skill['description'] : '',
+                'group' => $group !== '' ? $group : null,
+                'icon' => \is_string($skill['icon']) ? $skill['icon'] : 'folder',
+                'color' => \is_string($skill['color']) ? $skill['color'] : 'blue',
+                'content' => \is_string($skill['content']) ? $skill['content'] : '',
+            ],
+            trim($user->getFirstName() . ' ' . $user->getLastName()),
+            $user->getEmail(),
+        );
 
         $redirect = $request->request->getString('redirect');
 

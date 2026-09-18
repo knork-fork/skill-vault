@@ -21,7 +21,12 @@ final class RelativeTime
         if ($days === 0) {
             $hours = $diff->h;
             if ($hours === 0) {
-                return 'just now';
+                $minutes = $diff->i;
+                if ($minutes === 0) {
+                    return 'just now';
+                }
+
+                return $minutes === 1 ? '1 minute ago' : \sprintf('%d minutes ago', $minutes);
             }
 
             return $hours === 1 ? '1 hour ago' : \sprintf('%d hours ago', $hours);

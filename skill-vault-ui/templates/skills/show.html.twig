@@ -282,6 +282,221 @@
         color: var(--text);
         font-weight: 700;
     }
+
+    .history-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .history-stat {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 20px;
+    }
+
+    .history-stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .history-stat-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .history-stat-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1.25;
+    }
+
+    .history-stat-label {
+        font-size: 0.88rem;
+        color: var(--text-soft);
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .history-stat-caption {
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin-top: 6px;
+    }
+
+    .history-empty {
+        margin: 0;
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+    }
+
+    .history-list {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .history-row {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+        padding: 0 20px;
+    }
+
+    .history-row:not(:last-child) {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .history-row.current {
+        background: rgba(43, 82, 224, 0.06);
+    }
+
+    .history-row-marker {
+        position: relative;
+        flex-shrink: 0;
+        width: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* A line through the marker's full height, trimmed to start/end at this row's
+       dot (which sits at 50%, same as the line) instead of at the row edge - so it
+       always touches every dot exactly, regardless of row height. */
+    .history-row-marker::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 2px;
+        background: var(--border);
+        transform: translateX(-50%);
+    }
+
+    .history-row:first-child .history-row-marker::before {
+        top: 50%;
+    }
+
+    .history-row:last-child .history-row-marker::before {
+        bottom: 50%;
+    }
+
+    .history-dot {
+        position: relative;
+        z-index: 1;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border-strong);
+        border: 2px solid var(--surface);
+    }
+
+    .history-row.current .history-dot {
+        background: var(--accent);
+        border-color: rgba(43, 82, 224, 0.06);
+    }
+
+    .history-row-body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 0;
+    }
+
+    .history-row-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .history-version {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .history-current-pill {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #1a7f4b;
+        background: rgba(26, 127, 75, 0.12);
+        border-radius: 999px;
+        padding: 2px 10px;
+    }
+
+    .history-row-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .history-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(140deg, var(--accent) 0%, var(--accent-deep) 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.68rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .history-author {
+        color: var(--text-soft);
+        font-weight: 600;
+    }
+
+    .history-row-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .history-action {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+    }
+
+    .history-action:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 </style>
 {% endblock %}
 
@@ -366,6 +581,7 @@
                 <div class="tabs">
                     <button type="button" class="tab active" data-tab="content">Content</button>
                     <button type="button" class="tab" data-tab="details">Details</button>
+                    <button type="button" class="tab" data-tab="history">History</button>
                 </div>
 
                 <div class="tab-panel active" id="contentTab">
@@ -390,6 +606,45 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="tab-panel" id="historyTab">
+                    <div class="history-summary">
+                        <div class="history-stat">
+                            <span class="history-stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </span>
+                            <div>
+                                <div class="history-stat-value" data-history-total-versions>—</div>
+                                <div class="history-stat-label">Total versions</div>
+                                <div class="history-stat-caption">Across all saved edits</div>
+                            </div>
+                        </div>
+                        <div class="history-stat">
+                            <span class="history-stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <div>
+                                <div class="history-stat-value" data-history-last-edited-by>—</div>
+                                <div class="history-stat-label">Last edited by</div>
+                                <div class="history-stat-caption" data-history-last-edited-at></div>
+                            </div>
+                        </div>
+                        <div class="history-stat">
+                            <span class="history-stat-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.82 0l4.6-4.6a2 2 0 0 0 0-2.82z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
+                            </span>
+                            <div>
+                                <div class="history-stat-value" data-history-current-version>—</div>
+                                <div class="history-stat-label">Current version</div>
+                                <div class="history-stat-caption" data-history-current-date></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-list" data-history-list>
+                        <p class="history-empty">Loading history…</p>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -402,7 +657,8 @@
     var tabs = document.querySelectorAll('.tab');
     var panels = {
         content: document.getElementById('contentTab'),
-        details: document.getElementById('detailsTab')
+        details: document.getElementById('detailsTab'),
+        history: document.getElementById('historyTab')
     };
 
     tabs.forEach(function (tab) {
@@ -414,8 +670,142 @@
             Object.keys(panels).forEach(function (key) {
                 panels[key].classList.toggle('active', key === tab.dataset.tab);
             });
+            if (tab.dataset.tab === 'history') {
+                loadHistory();
+            }
         });
     });
+
+    var historyLoaded = false;
+
+    function loadHistory() {
+        if (historyLoaded) {
+            return;
+        }
+        historyLoaded = true;
+
+        fetch('{{ path('app_skill_history', {slug: skill.slug}) }}', {
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(renderHistory)
+            .catch(function () {
+                historyLoaded = false;
+                renderHistory(null);
+            });
+    }
+
+    function renderHistory(history) {
+        var list = document.querySelector('[data-history-list]');
+        list.textContent = '';
+
+        if (!history) {
+            document.querySelector('[data-history-total-versions]').textContent = '—';
+            document.querySelector('[data-history-last-edited-by]').textContent = '—';
+            document.querySelector('[data-history-last-edited-at]').textContent = '';
+            document.querySelector('[data-history-current-version]').textContent = '—';
+            document.querySelector('[data-history-current-date]').textContent = '';
+
+            var empty = document.createElement('p');
+            empty.className = 'history-empty';
+            empty.textContent = 'No git repo setup';
+            list.appendChild(empty);
+            return;
+        }
+
+        var current = history.versions[0];
+
+        document.querySelector('[data-history-total-versions]').textContent = history.totalVersions;
+        document.querySelector('[data-history-last-edited-by]').textContent = history.lastEditedBy;
+        document.querySelector('[data-history-last-edited-at]').textContent = current.relative;
+        document.querySelector('[data-history-current-version]').textContent = 'Version ' + history.currentVersion;
+        document.querySelector('[data-history-current-date]').textContent = current.date;
+
+        history.versions.forEach(function (version) {
+            list.appendChild(buildHistoryRow(version));
+        });
+    }
+
+    function buildHistoryRow(version) {
+        var row = document.createElement('div');
+        row.className = 'history-row' + (version.current ? ' current' : '');
+
+        var marker = document.createElement('div');
+        marker.className = 'history-row-marker';
+        var dot = document.createElement('span');
+        dot.className = 'history-dot';
+        marker.appendChild(dot);
+        row.appendChild(marker);
+
+        var card = document.createElement('div');
+        card.className = 'history-row-body';
+
+        var main = document.createElement('div');
+
+        var top = document.createElement('div');
+        top.className = 'history-row-top';
+        var versionLabel = document.createElement('span');
+        versionLabel.className = 'history-version';
+        versionLabel.textContent = 'Version ' + version.version;
+        top.appendChild(versionLabel);
+        if (version.current) {
+            var pill = document.createElement('span');
+            pill.className = 'history-current-pill';
+            pill.textContent = 'Current version';
+            top.appendChild(pill);
+        }
+        main.appendChild(top);
+
+        var meta = document.createElement('div');
+        meta.className = 'history-row-meta';
+        var avatar = document.createElement('span');
+        avatar.className = 'history-avatar';
+        avatar.textContent = version.authorInitials;
+        var author = document.createElement('span');
+        author.className = 'history-author';
+        author.textContent = version.author;
+        var time = document.createElement('span');
+        time.textContent = version.relative + ' · ' + version.date;
+        meta.appendChild(avatar);
+        meta.appendChild(author);
+        meta.appendChild(time);
+        main.appendChild(meta);
+
+        card.appendChild(main);
+
+        var actions = document.createElement('div');
+        actions.className = 'history-row-actions';
+
+        var viewDiff = document.createElement('button');
+        viewDiff.type = 'button';
+        viewDiff.className = 'btn-outline history-action';
+        viewDiff.textContent = 'View diff';
+        viewDiff.disabled = true;
+        actions.appendChild(viewDiff);
+
+        var compare = document.createElement('button');
+        compare.type = 'button';
+        compare.className = 'btn-outline history-action';
+        compare.textContent = 'Compare';
+        compare.disabled = true;
+        actions.appendChild(compare);
+
+        var viewFile = document.createElement('button');
+        viewFile.type = 'button';
+        viewFile.className = 'btn-outline icon-btn-outline history-action';
+        viewFile.setAttribute('aria-label', 'View file at this version');
+        viewFile.title = 'View file at this version';
+        viewFile.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        viewFile.disabled = true;
+        actions.appendChild(viewFile);
+
+        card.appendChild(actions);
+        row.appendChild(card);
+
+        return row;
+    }
 
     var menuBtn = document.getElementById('skillMenuBtn');
     menuBtn.addEventListener('click', function (event) {

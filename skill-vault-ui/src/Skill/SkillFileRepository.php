@@ -14,11 +14,17 @@ use RecursiveIteratorIterator;
 use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Reads and writes skills stored as `{resourcesDir}/skills/<slug>/{metadata.yaml,skill.md}`,
  * per the format documented in docs/Skills_vs_Tools.md.
+ *
+ * `save()` serializes writes across php-fpm workers with an flock() on a single lock file
+ * for the whole `skills/` directory, not just the one being saved: every skill's history
+ * commit lands in the same git repo, sharing one `.git/index`, so two concurrent saves to
+ * *different* skills could otherwise still race on `git add`/`git commit`.
  */
 final class SkillFileRepository
 {
@@ -74,26 +80,87 @@ final class SkillFileRepository
     /**
      * @param array{name: string, description: string, group: string|null, icon: string, color: string, content: string} $data
      */
-    public function save(string $slug, array $data): void
+    public function save(string $slug, array $data, string $authorName, ?string $authorEmail = null): void
     {
-        $dir = $this->resourcesDir . '/skills/' . $slug;
-        if (!is_dir($dir) && !mkdir($dir, 0o775, true) && !is_dir($dir)) {
-            throw new RuntimeException(\sprintf('Could not create skill directory "%s".', $dir));
+        $skillsDir = $this->resourcesDir . '/skills';
+        if (!is_dir($skillsDir) && !mkdir($skillsDir, 0o775, true) && !is_dir($skillsDir)) {
+            throw new RuntimeException(\sprintf('Could not create skills directory "%s".', $skillsDir));
         }
 
-        $metadata = [
-            'name' => $data['name'],
-            'description' => $data['description'],
-            'icon' => $data['icon'],
-            'color' => $data['color'],
-            'requires' => [],
+        $lock = fopen($skillsDir . '/.save.lock', 'c');
+        if ($lock === false) {
+            throw new RuntimeException('Could not open the skill save lock file.');
+        }
+
+        try {
+            if (!flock($lock, \LOCK_EX)) {
+                throw new RuntimeException('Could not acquire the skill save lock.');
+            }
+
+            $dir = $skillsDir . '/' . $slug;
+            if (!is_dir($dir) && !mkdir($dir, 0o775, true) && !is_dir($dir)) {
+                throw new RuntimeException(\sprintf('Could not create skill directory "%s".', $dir));
+            }
+
+            $metadata = [
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'icon' => $data['icon'],
+                'color' => $data['color'],
+                'requires' => [],
+            ];
+            if ($data['group'] !== null) {
+                $metadata['group'] = $data['group'];
+            }
+
+            $contentFile = $dir . '/skill.md';
+            $previousContent = is_file($contentFile) ? file_get_contents($contentFile) : null;
+
+            file_put_contents($dir . '/metadata.yaml', Yaml::dump($metadata));
+            file_put_contents($contentFile, $data['content']);
+
+            if ($previousContent === false || $previousContent !== $data['content']) {
+                $this->commitSkillContent($slug, $authorName, $authorEmail);
+            }
+        } finally {
+            flock($lock, \LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * Commits the current `skill.md` for a skill to the internal git repo at
+     * `{resourcesDir}/skills/.git`, one commit per edit (read back by
+     * `SkillHistoryRepository`). A missing repo is a no-op: recording history is opt-in,
+     * not a requirement for saving a skill.
+     */
+    private function commitSkillContent(string $slug, string $authorName, ?string $authorEmail): void
+    {
+        $repoDir = $this->resourcesDir . '/skills';
+        if (!is_dir($repoDir . '/.git')) {
+            return;
+        }
+
+        $relativePath = $slug . '/skill.md';
+        $env = [
+            'GIT_AUTHOR_NAME' => $authorName,
+            'GIT_AUTHOR_EMAIL' => $authorEmail ?? 'no-reply@skill-vault.local',
+            'GIT_COMMITTER_NAME' => $authorName,
+            'GIT_COMMITTER_EMAIL' => $authorEmail ?? 'no-reply@skill-vault.local',
         ];
-        if ($data['group'] !== null) {
-            $metadata['group'] = $data['group'];
+
+        $add = new Process(['git', '-C', $repoDir, '-c', 'safe.directory=' . $repoDir, 'add', '--', $relativePath]);
+        $add->run();
+        if (!$add->isSuccessful()) {
+            return;
         }
 
-        file_put_contents($dir . '/metadata.yaml', Yaml::dump($metadata));
-        file_put_contents($dir . '/skill.md', $data['content']);
+        $commit = new Process(
+            ['git', '-C', $repoDir, '-c', 'safe.directory=' . $repoDir, 'commit', '--only', '-m', \sprintf('Update %s', $relativePath), '--', $relativePath],
+            null,
+            $env,
+        );
+        $commit->run();
     }
 
     public function delete(string $slug): void

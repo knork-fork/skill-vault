@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Repository\SkillGroupRepository;
 use App\Skill\SkillAccessService;
 use App\Skill\SkillFileRepository;
+use App\Skill\SkillHistoryRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -24,6 +25,7 @@ final class SkillController extends AbstractController
         private readonly SkillFileRepository $skills,
         private readonly SkillGroupRepository $skillGroups,
         private readonly SkillAccessService $skillAccess,
+        private readonly SkillHistoryRepository $skillHistory,
     ) {
     }
 
@@ -92,14 +94,19 @@ final class SkillController extends AbstractController
             $group = '';
         }
 
-        $this->skills->save($slug, [
-            'name' => $name,
-            'description' => trim($request->request->getString('description')),
-            'group' => $group !== '' ? $group : null,
-            'icon' => $request->request->getString('icon', 'folder'),
-            'color' => $request->request->getString('color', 'blue'),
-            'content' => $request->request->getString('content'),
-        ]);
+        $this->skills->save(
+            $slug,
+            [
+                'name' => $name,
+                'description' => trim($request->request->getString('description')),
+                'group' => $group !== '' ? $group : null,
+                'icon' => $request->request->getString('icon', 'folder'),
+                'color' => $request->request->getString('color', 'blue'),
+                'content' => $request->request->getString('content'),
+            ],
+            trim($user->getFirstName() . ' ' . $user->getLastName()),
+            $user->getEmail(),
+        );
 
         return $this->redirectToRoute('app_skill', ['slug' => $slug]);
     }
@@ -117,6 +124,16 @@ final class SkillController extends AbstractController
             'skill' => $skill,
             'groupNames' => $this->groupNames(),
         ]);
+    }
+
+    #[Route(path: '/skills/{slug}/history', name: 'app_skill_history', methods: ['GET'])]
+    public function history(string $slug): JsonResponse
+    {
+        if ($this->skills->findBySlug($slug) === null) {
+            throw $this->createNotFoundException('Skill not found.');
+        }
+
+        return new JsonResponse($this->skillHistory->findHistory($slug));
     }
 
     #[Route(path: '/skills/{slug}/edit', name: 'app_skill_edit', methods: ['GET'])]
@@ -137,7 +154,7 @@ final class SkillController extends AbstractController
     }
 
     #[Route(path: '/skills/{slug}/edit', name: 'app_skill_update', methods: ['POST'])]
-    public function update(Request $request, string $slug): RedirectResponse
+    public function update(#[CurrentUser] User $user, Request $request, string $slug): RedirectResponse
     {
         if ($this->skills->findBySlug($slug) === null) {
             throw $this->createNotFoundException('Skill not found.');
@@ -157,14 +174,19 @@ final class SkillController extends AbstractController
             $group = '';
         }
 
-        $this->skills->save($slug, [
-            'name' => $name,
-            'description' => trim($request->request->getString('description')),
-            'group' => $group !== '' ? $group : null,
-            'icon' => $request->request->getString('icon', 'folder'),
-            'color' => $request->request->getString('color', 'blue'),
-            'content' => $request->request->getString('content'),
-        ]);
+        $this->skills->save(
+            $slug,
+            [
+                'name' => $name,
+                'description' => trim($request->request->getString('description')),
+                'group' => $group !== '' ? $group : null,
+                'icon' => $request->request->getString('icon', 'folder'),
+                'color' => $request->request->getString('color', 'blue'),
+                'content' => $request->request->getString('content'),
+            ],
+            trim($user->getFirstName() . ' ' . $user->getLastName()),
+            $user->getEmail(),
+        );
 
         return $this->redirectToRoute('app_skill', ['slug' => $slug]);
     }

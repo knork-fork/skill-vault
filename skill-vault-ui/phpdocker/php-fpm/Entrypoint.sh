@@ -15,4 +15,16 @@ if [ -d /resources ]; then
     chown -R www-data:www-data /resources
 fi
 
+# The internal per-skill history repo (resources/skills/.git) is also written to
+# directly from the host sometimes (a different uid than this container's www-data).
+# Plain chown only holds until the next host-side commit flips ownership of files
+# like COMMIT_EDITMSG/index back, locking www-data out with EACCES. core.sharedRepository
+# makes git create those files world-writable from then on regardless of which uid
+# writes them, so neither side can lock the other out again; the chmod repairs files
+# a host-side commit already wrote before this was set.
+if [ -d /resources/skills/.git ]; then
+    git config --file /resources/skills/.git/config core.sharedRepository all
+    chmod -R a+rwX /resources/skills/.git
+fi
+
 exec "$@"
