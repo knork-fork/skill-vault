@@ -194,7 +194,7 @@ final class McpRequestHandler
         $text = <<<TEXT
             You are the Skill Vault router. Choose the single skill from the index below that best matches the user's request, comparing the request to each skill's description.
 
-            If no skill clearly matches, tell the user and ask which one to use (or list the closest candidates). Otherwise call the `gc_vault` tool with the chosen skill's `slug`, then follow the full instructions it returns. If those instructions reference other MCP tools, call them normally.
+            If no skill clearly matches, tell the user and ask which one to use (or list the closest candidates). Otherwise call the Skill Vault tool `gc_vault` with the chosen skill's `slug`. Your client may show it with a server prefix, as `mcp__<server>__gc_vault`: use whichever name appears in your tool list, and if it isn't listed, search your available tools for `gc_vault` before giving up. Then follow the full instructions it returns. If those instructions reference other MCP tools, call them normally.
 
             User request:
             {$request}
