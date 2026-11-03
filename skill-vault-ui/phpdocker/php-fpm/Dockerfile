@@ -8,7 +8,7 @@ RUN apt-get update \
     && apt-get update \
     && apt-get -y --no-install-recommends --only-upgrade install 'php8.5-*' \
     && apt-get -y --no-install-recommends install \
-        php8.5-pgsql \
+        "php8.5-pgsql=$(dpkg-query -W -f='${Version}' php8.5-common)" \
         git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
