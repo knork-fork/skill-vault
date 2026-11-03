@@ -68,6 +68,6 @@ final class InternalSkillsController extends AbstractController
             $enabledSkills,
         );
 
-        return new JsonResponse(['skills' => $skills]);
+        return new JsonResponse(['exposure_setting' => $user->getExposureSetting(), 'skills' => $skills]);
     }
 }

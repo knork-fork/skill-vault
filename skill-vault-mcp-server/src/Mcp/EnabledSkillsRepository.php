@@ -19,6 +19,9 @@ use Throwable;
  */
 final class EnabledSkillsRepository
 {
+    public const DIRECT_EXPOSURE = 'direct_exposure';
+    public const ROUTED_EXPOSURE = 'routed_exposure';
+
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         #[Autowire(param: 'app.skill_vault_ui_internal_url')]
@@ -33,6 +36,17 @@ final class EnabledSkillsRepository
      */
     public function findAllForUser(int $userId): array
     {
+        return $this->fetchForUser($userId)['skills'];
+    }
+
+    /**
+     * One round trip for both the user's exposure setting and enabled skills. Fails closed to
+     * direct exposure with no skills.
+     *
+     * @return array{exposureSetting: string, skills: list<array{slug: string, name: string, description: string, requires: list<string>, content: string}>}
+     */
+    public function fetchForUser(int $userId): array
+    {
         try {
             $response = $this->httpClient->request('GET', $this->skillVaultUiInternalUrl . '/internal/skills/enabled', [
                 'headers' => ['X-Internal-Secret' => $this->sharedSecret],
@@ -42,7 +56,7 @@ final class EnabledSkillsRepository
         } catch (Throwable) {
             // Fail closed: if skill-vault-ui can't be reached or rejects the call, the
             // caller sees no skills rather than falling back to everything on disk.
-            return [];
+            return ['exposureSetting' => self::DIRECT_EXPOSURE, 'skills' => []];
         }
 
         $skills = \is_array($data['skills'] ?? null) ? $data['skills'] : [];
@@ -69,7 +83,12 @@ final class EnabledSkillsRepository
             ];
         }
 
-        return $result;
+        return [
+            'exposureSetting' => ($data['exposure_setting'] ?? null) === self::ROUTED_EXPOSURE
+                ? self::ROUTED_EXPOSURE
+                : self::DIRECT_EXPOSURE,
+            'skills' => $result,
+        ];
     }
 
     /**

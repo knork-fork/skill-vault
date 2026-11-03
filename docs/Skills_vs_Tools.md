@@ -120,3 +120,6 @@ user for individual selection.
   class, which executes the integration logic and returns the resulting data.
 - `name == "compile_trello_notes"` (a skill) → backend returns the skill's instructions (the contents of
   `skill.md`) as the tool result, without executing anything.
+## MCP exposure (routed mode)
+
+When the user's `exposure_setting` is `routed_exposure`, `tools/list` omits all skills and adds one `gc_vault` tool (`{slug}` → returns that skill's `skill.md`, access re-checked per call). `prompts/list` exposes a single `gc-vault` prompt (`/gc-vault <request>`) whose `prompts/get` text holds the request plus a slug/name/description-only index of the user's enabled skills. Executable tools stay listed as in direct mode; in direct mode `prompts/list` is empty.
