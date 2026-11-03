@@ -19,14 +19,14 @@ final class IntegrationController extends AbstractController
             [
                 'key' => 'trello',
                 'name' => 'Trello',
-                'connected' => true,
+                'connected' => false,
                 'account' => $user->getEmail(),
                 'description' => 'Access your boards, tasks, and project data.',
             ],
             [
                 'key' => 'google_drive',
                 'name' => 'Google Drive',
-                'connected' => true,
+                'connected' => false,
                 'account' => $user->getEmail(),
                 'description' => 'Access your files, documents, and drive content.',
             ],

@@ -334,7 +334,7 @@
             </div>
 
             <section>
-                <h2 class="section-heading">Your Integrations</h2>
+                <h2 class="section-heading">Your Integrations (WIP)</h2>
 
                 <div class="integration-grid">
                     {% for integration in integrations %}
@@ -362,12 +362,17 @@
 
                             <div class="integration-actions">
                                 <button type="button" class="btn btn-manage">Manage</button>
-                                <button type="button" class="btn btn-disconnect">Disconnect</button>
+                                <button type="button" class="btn btn-disconnect">{{ integration.connected ? 'Disconnect' : 'Reconnect' }}</button>
                             </div>
 
                             <div class="integration-note">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                                <span>This integration uses your personal {{ integration.name }} account. Only you can access this data.</span>
+                                <span>
+                                    This integration uses your personal {{ integration.name }} account.
+                                    Only you can access this data.
+                                    <br><br>
+                                    <b>Note:</b> This is a work in progress. The integration is not functional yet.
+                                </span>
                             </div>
                         </div>
                     {% endfor %}
