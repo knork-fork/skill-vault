@@ -383,8 +383,8 @@
                 <h2 class="section-heading">Claude Exposure Settings</h2>
                 <p class="section-subtext">Choose how your skills and integrations are exposed to Claude.</p>
 
-                <div class="exposure-grid" id="exposureGrid">
-                    <button type="button" class="exposure-option {{ exposureMode == 'direct' ? 'selected' : '' }}" data-mode="direct">
+                <div class="exposure-grid" id="exposureGrid" data-url="{{ path('app_integrations_set_exposure') }}" data-token="{{ csrf_token('set_exposure_setting') }}">
+                    <button type="button" class="exposure-option {{ exposureMode == 'direct_exposure' ? 'selected' : '' }}" data-mode="direct_exposure">
                         <div class="exposure-option-head">
                             <span class="exposure-radio"></span>
                             <div>
@@ -415,7 +415,7 @@
                         </ul>
                     </button>
 
-                    <button type="button" class="exposure-option {{ exposureMode == 'routed' ? 'selected' : '' }}" data-mode="routed">
+                    <button type="button" class="exposure-option {{ exposureMode == 'routed_exposure' ? 'selected' : '' }}" data-mode="routed_exposure">
                         <div class="exposure-option-head">
                             <span class="exposure-radio"></span>
                             <div>
@@ -464,6 +464,9 @@
         grid.querySelectorAll('.exposure-option').forEach(function (el) {
             el.classList.toggle('selected', el === option);
         });
+
+        var body = new URLSearchParams({_token: grid.dataset.token, mode: option.dataset.mode});
+        fetch(grid.dataset.url, {method: 'POST', body: body});
     });
 
     document.querySelectorAll('.btn-disconnect').forEach(function (btn) {

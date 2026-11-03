@@ -38,6 +38,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'last_name', length: 100)]
     private string $lastName;
 
+    #[ORM\Column(name: 'exposure_setting', length: 50, nullable: true)]
+    private ?string $exposureSetting = null;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
@@ -114,6 +117,18 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getExposureSetting(): string
+    {
+        return $this->exposureSetting ?? 'direct_exposure';
+    }
+
+    public function setExposureSetting(?string $exposureSetting): static
+    {
+        $this->exposureSetting = $exposureSetting;
 
         return $this;
     }

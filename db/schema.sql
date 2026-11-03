@@ -5,7 +5,8 @@ CREATE TABLE users (
     email VARCHAR(180),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL
+    last_name VARCHAR(100) NOT NULL,
+    exposure_setting VARCHAR(50)
 );
 
 CREATE TABLE skill_groups (
