@@ -36,6 +36,8 @@ final class McpRequestHandler
     public function __construct(
         private readonly EnabledSkillsRepository $skills,
         private readonly ToolFileRepository $tools,
+        private readonly EnvVarsRepository $envVars,
+        private readonly PlaceholderSubstituter $placeholders,
     ) {
     }
 
@@ -243,14 +245,14 @@ final class McpRequestHandler
                 ];
             }
 
-            return ['content' => [['type' => 'text', 'text' => $skill['content']]]];
+            return ['content' => [['type' => 'text', 'text' => $this->fillPlaceholders($skill['content'], $identity)]]];
         }
 
         $skill = $routed ? null : $this->findSkill($enabled['skills'], $name);
         if ($skill !== null) {
             return [
                 'content' => [
-                    ['type' => 'text', 'text' => $skill['content']],
+                    ['type' => 'text', 'text' => $this->fillPlaceholders($skill['content'], $identity)],
                 ],
             ];
         }
@@ -271,6 +273,11 @@ final class McpRequestHandler
         }
 
         throw new McpInvalidParamsException(\sprintf('Unknown tool "%s".', $name));
+    }
+
+    private function fillPlaceholders(string $content, TokenIdentity $identity): string
+    {
+        return $this->placeholders->substitute($content, $this->envVars->findAllForUser($identity->userId));
     }
 
     /**
