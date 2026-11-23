@@ -8,7 +8,13 @@ Environment variables let you keep values such as IDs, URLs or names out of skil
 2. Click **+** in the table header (or **Add variable** if you have none yet).
 3. Enter a **placeholder** and a **value**, then click **Save**.
 
-Placeholders must start with a letter or underscore, contain only letters, digits and underscores, and be unique to you (e.g. `TRELLO_BOARD_ID`). Values cannot be empty. Use the **✕** button on a row to delete a variable.
+Placeholders must start with a letter or underscore, contain only letters, digits and underscores, and be unique to you (e.g. `TRELLO_BOARD_ID`). Values cannot be empty. Use the pencil button on a row to edit it and the **✕** button to delete it.
+
+## Set a variable from a skill
+
+Open a skill: placeholders in its **Content** tab are **bold red** if you haven't set them and **blue** if you have (hover to see the value). Click a red one to jump to **Environment Variables** with its name filled in, then type the value and click **Save**.
+
+Enabled skills with unset placeholders are flagged with a red warning icon on the **Skills** nav item and in the skills list (hover for the missing names).
 
 ## Use a variable in a skill
 
