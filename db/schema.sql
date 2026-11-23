@@ -6,7 +6,9 @@ CREATE TABLE users (
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    exposure_setting VARCHAR(50)
+    exposure_setting VARCHAR(50),
+    -- Date of the newest changelog entry the user has acknowledged (see changelog.json); NULL = none yet.
+    last_seen_changelog DATE
 );
 
 CREATE TABLE skill_groups (

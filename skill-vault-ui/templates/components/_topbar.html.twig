@@ -5,6 +5,7 @@
     Include components/_topbar_styles.html.twig once in the page's stylesheets block.
 #}
 {% macro render(user) %}
+    {% import _self as self %}
     <header class="topbar">
         <div class="search-box" style="opacity:0.0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -25,12 +26,46 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="user-menu-panel">
+                    <a href="#" id="whatsNewBtn">What's new</a>
                     <a href="{{ path('app_settings') }}">Settings</a>
                     <a href="{{ path('app_logout') }}">Log out</a>
                 </div>
             </div>
         </div>
     </header>
+
+    {% set unseen = changelog_unseen(user) %}
+    {% if unseen is not empty %}
+        <div class="wn-overlay open" id="whatsNewRequired" role="dialog" aria-modal="true" aria-labelledby="wnRequiredTitle">
+            <div class="wn-modal">
+                <div class="wn-header">
+                    <h2 id="wnRequiredTitle">What's new</h2>
+                    <p>Latest Skill Vault updates</p>
+                </div>
+                <div class="wn-body">{{ self.entries(unseen) }}</div>
+                <div class="wn-footer">
+                    <span class="wn-footnote">Full changelog available in your profile menu</span>
+                    <button type="button" class="wn-ok" id="whatsNewOk" data-token="{{ csrf_token('whats_new_seen') }}" data-url="{{ path('app_whats_new_seen') }}">Got it</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="wn-overlay" id="whatsNewAll" role="dialog" aria-modal="true" aria-labelledby="wnAllTitle">
+        <div class="wn-modal">
+            <div class="wn-header">
+                <h2 id="wnAllTitle">What's new</h2>
+                <p>Full changelog</p>
+                <button type="button" class="wn-x" id="whatsNewClose" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="wn-body">
+                {% set all = changelog_all() %}
+                {% if all is empty %}<p class="wn-empty">Nothing to show yet.</p>{% else %}{{ self.entries(all) }}{% endif %}
+            </div>
+        </div>
+    </div>
 
     <script>
         (function () {
@@ -39,6 +74,44 @@
                 event.stopPropagation();
                 menuBtn.closest('.user-menu').classList.toggle('open');
             });
+            var allModal = document.getElementById('whatsNewAll');
+            document.getElementById('whatsNewBtn').addEventListener('click', function (event) {
+                event.preventDefault();
+                menuBtn.closest('.user-menu').classList.remove('open');
+                allModal.classList.add('open');
+            });
+            document.getElementById('whatsNewClose').addEventListener('click', function () {
+                allModal.classList.remove('open');
+            });
+            allModal.addEventListener('click', function (event) {
+                if (event.target === allModal) {
+                    allModal.classList.remove('open');
+                }
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    allModal.classList.remove('open');
+                }
+            });
+
+            // Mandatory modal: no backdrop/Escape dismissal, only the Okay button (which records it as seen).
+            var okBtn = document.getElementById('whatsNewOk');
+            if (okBtn) {
+                okBtn.addEventListener('click', function () {
+                    okBtn.disabled = true;
+                    var body = new URLSearchParams({_token: okBtn.dataset.token});
+                    fetch(okBtn.dataset.url, {method: 'POST', body: body, credentials: 'same-origin'})
+                        .then(function (r) {
+                            if (!r.ok) { throw new Error('failed'); }
+                            document.getElementById('whatsNewRequired').classList.remove('open');
+                        })
+                        .catch(function () {
+                            okBtn.disabled = false;
+                            okBtn.textContent = 'Something went wrong, try again';
+                        });
+                });
+            }
+
             document.addEventListener('click', function (event) {
                 if (event.target.closest('.user-menu-panel')) {
                     return;
@@ -47,4 +120,21 @@
             });
         })();
     </script>
+{% endmacro %}
+
+{% macro entries(entries) %}
+    {% for entry in entries %}
+        <section class="wn-entry">
+            <h3>{{ entry.date|date('F j, Y')|upper }}</h3>
+            {% for item in entry.items %}
+                <div class="wn-item">
+                    <div class="wn-text">
+                        <strong>{{ item.title }}</strong>
+                        {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+                        {% if item.documentationUrl %}<a href="{{ item.documentationUrl }}">Learn more &rarr;</a>{% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    {% endfor %}
 {% endmacro %}

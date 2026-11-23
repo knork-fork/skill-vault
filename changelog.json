@@ -1,0 +1,13 @@
+{
+    "2026-11-23": [
+        {
+            "title": "Environment variables",
+            "description": "Define personal variables under Settings > Environment Variables and reference them in skills using {{PLACEHOLDER}}. Values are substituted automatically when skills are exposed through MCP, and missing variables are flagged next to Skills in the sidebar.",
+            "documentationUrl": "/docs/How_to_Use_Environment_Variables"
+        },
+        {
+            "title": "Change your password",
+            "description": "You can now update your password directly under Settings."
+        }
+    ]
+}

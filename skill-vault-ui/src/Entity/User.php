@@ -41,6 +41,9 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'exposure_setting', length: 50, nullable: true)]
     private ?string $exposureSetting = null;
 
+    #[ORM\Column(name: 'last_seen_changelog', type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $lastSeenChangelog = null;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
@@ -129,6 +132,18 @@ final class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setExposureSetting(?string $exposureSetting): static
     {
         $this->exposureSetting = $exposureSetting;
+
+        return $this;
+    }
+
+    public function getLastSeenChangelog(): ?DateTimeImmutable
+    {
+        return $this->lastSeenChangelog;
+    }
+
+    public function setLastSeenChangelog(?DateTimeImmutable $lastSeenChangelog): static
+    {
+        $this->lastSeenChangelog = $lastSeenChangelog;
 
         return $this;
     }

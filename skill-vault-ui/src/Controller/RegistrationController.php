@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -54,6 +55,8 @@ final class RegistrationController extends AbstractController
                 throw new LogicException('Expected plainPassword field to submit a string.');
             }
 
+            // New users start with a clean slate: only changelog entries after signup count as new.
+            $user->setLastSeenChangelog(new DateTimeImmutable('today'));
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
 
             $entityManager->persist($user);

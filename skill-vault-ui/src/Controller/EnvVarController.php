@@ -47,14 +47,39 @@ final class EnvVarController extends AbstractController
         $placeholder = trim($request->request->getString('placeholder'));
         $value = $request->request->getString('value');
 
-        if ($placeholder === '' || \strlen($placeholder) > 255 || preg_match(self::PLACEHOLDER_PATTERN, $placeholder) !== 1) {
-            $this->addFlash('error', 'Placeholder must start with a letter or underscore and contain only letters, digits and underscores.');
-        } elseif ($value === '') {
-            $this->addFlash('error', 'Value must not be empty.');
-        } elseif ($this->envVars->findOneByUserAndPlaceholder($user, $placeholder) !== null) {
-            $this->addFlash('error', \sprintf('A variable named "%s" already exists.', $placeholder));
+        $error = $this->validate($user, $placeholder, $value);
+        if ($error !== null) {
+            $this->addFlash('error', $error);
         } else {
             $this->entityManager->persist(new UserEnvVar($user, $placeholder, $value));
+            $this->entityManager->flush();
+        }
+
+        return $this->back();
+    }
+
+    #[Route(path: '/settings/environment-variables/{id}/edit', name: 'app_settings_env_vars_edit', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function edit(#[CurrentUser] User $user, Request $request, int $id): Response
+    {
+        if (!$this->isCsrfTokenValid('edit_env_var', $request->request->getString('_token'))) {
+            $this->addFlash('error', 'Invalid form token. Please try again.');
+
+            return $this->back();
+        }
+
+        $envVar = $this->envVars->findOneByUserAndId($user, $id);
+        if ($envVar === null) {
+            return $this->back();
+        }
+
+        $placeholder = trim($request->request->getString('placeholder'));
+        $value = $request->request->getString('value');
+
+        $error = $this->validate($user, $placeholder, $value, $envVar);
+        if ($error !== null) {
+            $this->addFlash('error', $error);
+        } else {
+            $envVar->setPlaceholder($placeholder)->setValue($value);
             $this->entityManager->flush();
         }
 
@@ -77,6 +102,24 @@ final class EnvVarController extends AbstractController
         }
 
         return $this->back();
+    }
+
+    private function validate(User $user, string $placeholder, string $value, ?UserEnvVar $editing = null): ?string
+    {
+        if ($placeholder === '' || \strlen($placeholder) > 255 || preg_match(self::PLACEHOLDER_PATTERN, $placeholder) !== 1) {
+            return 'Placeholder must start with a letter or underscore and contain only letters, digits and underscores.';
+        }
+
+        if ($value === '') {
+            return 'Value must not be empty.';
+        }
+
+        $existing = $this->envVars->findOneByUserAndPlaceholder($user, $placeholder);
+        if ($existing !== null && $existing !== $editing) {
+            return \sprintf('A variable named "%s" already exists.', $placeholder);
+        }
+
+        return null;
     }
 
     private function back(): RedirectResponse
