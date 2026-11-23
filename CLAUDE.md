@@ -25,6 +25,10 @@ directory. In particular, do not assume `skill-vault-ui` is "the frontend" and `
 "the backend" for it — treat them as two separate targets and ask if it's unclear which one (or both) a task
 concerns.
 
+## Cross-service flows
+
+- Skill placeholders (`{{NAME}}`): users store values in `skill-vault-ui` (`user_env_vars`); `skill-vault-mcp-server` fetches them from the UI's `/internal/env-vars` and substitutes them when serving a skill. Details in `skill-vault-ui/CLAUDE.md`.
+
 ## Definition of done
 
 This list is provided as context on what the project is intended to accomplish. It is not a strict checklist, but rather a set of goals to guide development.

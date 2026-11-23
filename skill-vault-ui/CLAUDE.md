@@ -27,7 +27,7 @@ Postgres runs as the `db` service in the root `docker-compose.yml` (host port 20
 `skill-vault-mcp-db`). The schema is **not** managed by Doctrine migrations — it's owned by the shared
 `db/schema.sql` at the repo root and loaded via `db/init-db.sh` (also at the repo root, which drops and
 recreates the whole database, so only run it deliberately). `DATABASE_URL` in `.env` points at the `db`
-container. Doctrine entities in `src/Entity/` map onto those hand-written tables (`users`, `skill_groups`) —
+container. Doctrine entities in `src/Entity/` map onto those hand-written tables (`users`, `skill_groups`, `user_env_vars`, …) —
 when changing a column, edit `schema.sql` and the entity mapping together; `doctrine:schema:update` is not
 used to migrate.
 
@@ -38,6 +38,13 @@ mounted into the `php-fpm-ui` container at `/resources` (see `RESOURCES_DIR` in 
 `app.resources_dir` in `config/services.yaml`). `src/Skill/SkillFileRepository.php` and
 `src/Tool/ToolFileRepository.php` read (and, for skills, write) that directory directly — there's no
 database table for skills/tools themselves, only for `skill_groups`.
+
+## Environment variables & placeholders
+
+- Skill bodies may contain `{{NAME}}` placeholders (`[A-Za-z_][A-Za-z0-9_]*`, spaces inside braces allowed). Users set per-user values in Settings > Environment Variables (`EnvVarController`, `UserEnvVar` → `user_env_vars`); user docs: `docs/How_to_Use_Environment_Variables.md`.
+- `src/Skill/PlaceholderService.php` extracts placeholders, finds enabled skills with unset ones, and highlights them in the skill view (red links prefill the settings form). The regex is duplicated in skill-vault-mcp-server's `PlaceholderSubstituter` — keep both in sync.
+- The Skills nav warning comes from `GET /api/placeholders/missing`, fetched by the shell sidebar on every page.
+- The MCP server fetches values via `GET /internal/env-vars?user_id=` (`InternalEnvVarsController`, shared-secret protected) and does the substitution itself; unset placeholders stay as written.
 
 ## Auth architecture
 
