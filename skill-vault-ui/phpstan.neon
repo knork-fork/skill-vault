@@ -28,5 +28,6 @@ parameters:
               - src/Entity/OAuthRefreshToken.php
               - src/Entity/UserSkillState.php
               - src/Entity/UserSkillGroupState.php
+              - src/Entity/UserEnvVar.php
         - identifier: return.type
           path: src/Entity/User.php

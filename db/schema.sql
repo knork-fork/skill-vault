@@ -19,6 +19,16 @@ CREATE TABLE skill_groups (
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
+-- Per-user environment variables (placeholder -> value), managed in Settings > Environment Variables.
+CREATE TABLE user_env_vars (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    placeholder VARCHAR(255) NOT NULL,
+    value TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    UNIQUE (user_id, placeholder)
+);
+
 -- Per-user enable/disable opt-ins. Skills have no table of their own (they're files under
 -- resources/skills/<slug>, see skill-vault-ui/CLAUDE.md), so they're keyed by slug here; skill
 -- groups are keyed by their skill_groups.id. See skill-vault-ui's SkillAccessService for how an

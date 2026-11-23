@@ -1,0 +1,254 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}Environment Variables · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+    }
+
+    .usage-note {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 10px;
+        padding: 14px 18px;
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .usage-note a {
+        color: var(--accent);
+        font-weight: 600;
+        margin-left: 6px;
+    }
+
+    .usage-note code {
+        background: var(--surface-raised);
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-size: 0.85rem;
+    }
+
+    .empty-msg {
+        margin: 0 0 16px;
+        color: var(--text-muted);
+    }
+
+    .env-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+    }
+
+    .env-table th,
+    .env-table td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .env-table th {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+    }
+
+    .env-table td.value {
+        font-family: ui-monospace, monospace;
+        word-break: break-all;
+    }
+
+    .env-table .action-col {
+        width: 44px;
+        text-align: right;
+    }
+
+    .env-table form {
+        margin: 0;
+    }
+
+    .icon-action {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 8px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        color: var(--text-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .icon-action:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .icon-action.danger:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .icon-action svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .add-form {
+        display: none;
+        grid-template-columns: 1fr 2fr auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 16px;
+    }
+
+    .add-form.open {
+        display: grid;
+    }
+
+    .add-form .field {
+        margin: 0;
+    }
+
+    .add-form .btn-primary {
+        width: auto;
+        padding: 10px 20px;
+    }
+
+    .btn-add {
+        width: auto;
+        padding: 10px 20px;
+    }
+
+    .flash-error {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('settings') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <a href="{{ path('app_settings') }}">Settings</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Environment Variables</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>Environment Variables</h1>
+                        <p>Placeholders and values available to your skills.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="usage-note">
+                Reference a variable in a skill body as <code>{% verbatim %}{{PLACEHOLDER}}{% endverbatim %}</code>.
+                <a href="{{ path('app_docs_show', {slug: 'How_to_Use_Environment_Variables'}) }}">Read the guide</a>
+            </div>
+
+            <div class="panel">
+                {% for message in app.flashes('error') %}
+                    <div class="flash-error">{{ message }}</div>
+                {% endfor %}
+
+                <form method="post" action="{{ path('app_settings_env_vars_add') }}" class="add-form{{ app.flashes('error')|length ? ' open' : '' }}" id="addForm">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_env_var') }}">
+                    <div class="field">
+                        <label for="placeholder">Placeholder</label>
+                        <input type="text" id="placeholder" name="placeholder" required maxlength="255" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="value">Value</label>
+                        <input type="text" id="value" name="value" required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary">Save</button>
+                </form>
+
+                {% if envVars is empty %}
+                    <p class="empty-msg">You have no environment variables yet. Add a new variable to get started.</p>
+                    <button type="button" class="btn-primary btn-add" data-toggle-add>Add variable</button>
+                {% else %}
+                    <table class="env-table">
+                        <thead>
+                            <tr>
+                                <th>Placeholder</th>
+                                <th>Value</th>
+                                <th class="action-col">
+                                    <button type="button" class="icon-action" data-toggle-add title="Add variable" aria-label="Add variable"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for envVar in envVars %}
+                                <tr>
+                                    <td>{{ envVar.placeholder }}</td>
+                                    <td class="value">{{ envVar.value }}</td>
+                                    <td class="action-col">
+                                        <form method="post" action="{{ path('app_settings_env_vars_delete', {id: envVar.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_env_var') }}">
+                                            <button type="submit" class="icon-action danger" title="Delete" aria-label="Delete {{ envVar.placeholder }}">✕</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.querySelectorAll('[data-toggle-add]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var form = document.getElementById('addForm');
+            form.classList.toggle('open');
+            if (form.classList.contains('open')) {
+                document.getElementById('placeholder').focus();
+            }
+        });
+    });
+</script>
+{% endblock %}
