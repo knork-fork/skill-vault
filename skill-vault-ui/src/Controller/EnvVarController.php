@@ -26,11 +26,12 @@ final class EnvVarController extends AbstractController
     }
 
     #[Route(path: '/settings/environment-variables', name: 'app_settings_env_vars', methods: ['GET'])]
-    public function index(#[CurrentUser] User $user): Response
+    public function index(#[CurrentUser] User $user, Request $request): Response
     {
         return $this->render('settings/env_vars.html.twig', [
             'user' => $user,
             'envVars' => $this->envVars->findAllByUser($user),
+            'prefillPlaceholder' => $request->query->getString('placeholder'),
         ]);
     }
 

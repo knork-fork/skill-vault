@@ -186,15 +186,16 @@
             </div>
 
             <div class="panel">
-                {% for message in app.flashes('error') %}
+                {% set errors = app.flashes('error') %}
+                {% for message in errors %}
                     <div class="flash-error">{{ message }}</div>
                 {% endfor %}
 
-                <form method="post" action="{{ path('app_settings_env_vars_add') }}" class="add-form{{ app.flashes('error')|length ? ' open' : '' }}" id="addForm">
+                <form method="post" action="{{ path('app_settings_env_vars_add') }}" class="add-form{{ errors or prefillPlaceholder ? ' open' : '' }}" id="addForm">
                     <input type="hidden" name="_token" value="{{ csrf_token('add_env_var') }}">
                     <div class="field">
                         <label for="placeholder">Placeholder</label>
-                        <input type="text" id="placeholder" name="placeholder" required maxlength="255" autocomplete="off">
+                        <input type="text" id="placeholder" name="placeholder" required maxlength="255" autocomplete="off" value="{{ prefillPlaceholder }}">
                     </div>
                     <div class="field">
                         <label for="value">Value</label>
@@ -250,5 +251,9 @@
             }
         });
     });
+
+    {% if prefillPlaceholder %}
+        document.getElementById('value').focus();
+    {% endif %}
 </script>
 {% endblock %}

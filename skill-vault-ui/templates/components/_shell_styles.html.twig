@@ -90,6 +90,34 @@
         color: var(--accent-deep);
     }
 
+    .nav-item .nav-warning {
+        display: none;
+        margin-left: auto;
+        color: var(--danger);
+    }
+
+    .nav-item .nav-warning.visible {
+        display: inline-flex;
+    }
+
+    .nav-item .nav-warning svg,
+    .nav-item:hover .nav-warning svg {
+        width: 24px;
+        height: 24px;
+        color: var(--danger);
+    }
+
+    /* Solid red triangle with a white "!" so it stands out against the muted nav icons. */
+    .nav-warning svg path {
+        fill: var(--danger);
+        stroke: var(--danger);
+    }
+
+    .nav-warning svg line {
+        stroke: #fff;
+        stroke-width: 2.5;
+    }
+
     .main {
         flex: 1;
         min-width: 0;

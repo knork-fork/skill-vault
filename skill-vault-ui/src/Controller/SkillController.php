@@ -8,6 +8,7 @@ use App\Avatar\AvatarPalette;
 use App\Entity\SkillGroup;
 use App\Entity\User;
 use App\Repository\SkillGroupRepository;
+use App\Skill\PlaceholderService;
 use App\Skill\SkillAccessService;
 use App\Skill\SkillFileRepository;
 use App\Skill\SkillHistoryRepository;
@@ -26,6 +27,7 @@ final class SkillController extends AbstractController
         private readonly SkillGroupRepository $skillGroups,
         private readonly SkillAccessService $skillAccess,
         private readonly SkillHistoryRepository $skillHistory,
+        private readonly PlaceholderService $placeholders,
     ) {
     }
 
@@ -44,12 +46,15 @@ final class SkillController extends AbstractController
     public function index(#[CurrentUser] User $user): Response
     {
         $context = $this->skillAccess->contextForUser($user);
+        $missing = $this->placeholders->missingForEnabledSkills($user);
         $skills = array_map(
-            static function (array $skill) use ($context): array {
+            static function (array $skill) use ($context, $missing): array {
+                $slug = \is_string($skill['slug']) ? $skill['slug'] : '';
                 $skill['enabled'] = $context->isSkillEnabled(
-                    \is_string($skill['slug']) ? $skill['slug'] : '',
+                    $slug,
                     \is_string($skill['group'] ?? null) ? $skill['group'] : null,
                 );
+                $skill['missingPlaceholders'] = $missing[$slug] ?? [];
 
                 return $skill;
             },
@@ -119,9 +124,16 @@ final class SkillController extends AbstractController
             throw $this->createNotFoundException('Skill not found.');
         }
 
+        $content = \is_string($skill['content'] ?? null) ? $skill['content'] : '';
+
         return $this->render('skills/show.html.twig', [
             'user' => $user,
             'skill' => $skill,
+            'contentHtml' => $this->placeholders->highlight(
+                $content,
+                $this->placeholders->valuesForUser($user),
+                $this->generateUrl('app_settings_env_vars'),
+            ),
             'groupNames' => $this->groupNames(),
         ]);
     }

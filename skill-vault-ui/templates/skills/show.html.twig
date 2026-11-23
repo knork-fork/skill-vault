@@ -246,6 +246,16 @@
         padding: 20px 22px;
     }
 
+    .content-box .ph-set {
+        color: var(--accent);
+    }
+
+    .content-box .ph-missing {
+        color: var(--danger);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
     .content-box pre {
         margin: 0;
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -753,7 +763,7 @@
 
                 <div class="tab-panel active" id="contentTab">
                     <div class="content-box">
-                        <pre>{{ skill.content }}</pre>
+                        <pre>{{ contentHtml|raw }}</pre>
                     </div>
                 </div>
 
