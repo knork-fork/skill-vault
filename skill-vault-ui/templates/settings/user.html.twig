@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+{% import 'components/_shell.html.twig' as shell %}
+{% import 'components/_topbar.html.twig' as topbar %}
+
+{% block title %}User Settings · Skill Vault{% endblock %}
+
+{% block stylesheets %}
+{% include 'components/_avatar_styles.html.twig' %}
+{% include 'components/_shell_styles.html.twig' %}
+{% include 'components/_topbar_styles.html.twig' %}
+{% include 'components/_page_header_styles.html.twig' %}
+<style>
+    .content {
+        padding: 0 40px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+        max-width: 480px;
+    }
+
+    .panel h2 {
+        margin: 0 0 18px;
+        font-size: 1.1rem;
+    }
+
+    .panel .btn-primary {
+        width: auto;
+        padding: 10px 20px;
+    }
+
+    .flash-success {
+        background: #e8f6ee;
+        color: #1a7a42;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+    {{ shell.sidebar('settings') }}
+
+    <div class="main">
+        {{ topbar.render(user) }}
+
+        <main class="content">
+            <div class="page-hero">
+                <div class="breadcrumb">
+                    <a href="{{ path('app_home') }}">Home</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <a href="{{ path('app_settings') }}">Settings</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--text-faint);"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>User Settings</span>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h1>User Settings</h1>
+                        <p>Manage your account.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Change password</h2>
+
+                {% for message in app.flashes('success') %}
+                    <div class="flash-success">{{ message }}</div>
+                {% endfor %}
+
+                {{ form_start(passwordForm) }}
+                    <div class="field">
+                        {{ form_label(passwordForm.currentPassword) }}
+                        {{ form_widget(passwordForm.currentPassword) }}
+                        <div class="form-errors">{{ form_errors(passwordForm.currentPassword) }}</div>
+                    </div>
+                    <div class="field">
+                        {{ form_label(passwordForm.newPassword.first) }}
+                        {{ form_widget(passwordForm.newPassword.first) }}
+                        <div class="form-errors">{{ form_errors(passwordForm.newPassword.first) }}</div>
+                    </div>
+                    <div class="field">
+                        {{ form_label(passwordForm.newPassword.second) }}
+                        {{ form_widget(passwordForm.newPassword.second) }}
+                    </div>
+                    <button type="submit" class="btn-primary">Update password</button>
+                {{ form_end(passwordForm) }}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

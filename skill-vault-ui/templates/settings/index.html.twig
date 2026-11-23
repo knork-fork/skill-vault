@@ -17,49 +17,57 @@
         gap: 20px;
     }
 
-    .coming-soon {
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .category-card {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 14px;
         box-shadow: var(--card-shadow);
-        padding: 64px 24px;
+        padding: 22px;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 14px;
+        gap: 12px;
+        color: inherit;
+        text-decoration: none;
     }
 
-    .coming-soon .icon-badge {
-        width: 52px;
-        height: 52px;
-        border-radius: 15px;
+    .category-card:hover {
+        border-color: var(--accent);
+    }
+
+    .category-card .icon-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
         background: linear-gradient(140deg, var(--accent) 0%, var(--accent-deep) 100%);
         color: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;
-        box-shadow: 0 2px 6px rgba(43, 82, 224, 0.22);
     }
 
-    .coming-soon .icon-badge svg {
-        width: 24px;
-        height: 24px;
+    .category-card .icon-badge svg {
+        width: 22px;
+        height: 22px;
     }
 
-    .coming-soon h2 {
+    .category-card h2 {
         margin: 0;
-        font-size: 1.3rem;
+        font-size: 1.05rem;
         font-weight: 700;
         color: var(--text);
     }
 
-    .coming-soon p {
+    .category-card p {
         margin: 0;
-        max-width: 420px;
         color: var(--text-muted);
-        line-height: 1.5;
+        font-size: 0.9rem;
+        line-height: 1.45;
     }
 </style>
 {% endblock %}
@@ -87,12 +95,14 @@
                 </div>
             </div>
 
-            <div class="coming-soon">
-                <span class="icon-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                </span>
-                <h2>Coming soon</h2>
-                <p>Account and workspace settings are on the way. You'll be able to manage your profile, connections, and preferences from here.</p>
+            <div class="category-grid">
+                <a href="{{ path('app_settings_user') }}" class="category-card">
+                    <span class="icon-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </span>
+                    <h2>User Settings</h2>
+                    <p>Manage your account, including your password.</p>
+                </a>
             </div>
         </main>
     </div>
